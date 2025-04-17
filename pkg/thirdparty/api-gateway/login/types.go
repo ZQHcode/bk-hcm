@@ -17,42 +17,34 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package user ...
-package user
+package login
 
-import (
-	"hcm/cmd/web-server/service/capability"
-	"hcm/pkg/cc"
-	"hcm/pkg/client"
-	"hcm/pkg/rest"
-	"hcm/pkg/thirdparty/api-gateway/login"
-)
-
-// InitUserService initial the userSvc service
-func InitUserService(c *capability.Capability) {
-	svr := &userSvc{
-		client:            c.ApiClient,
-		loginCli:          c.LoginCli,
-		bkLoginCookieName: cc.WebServer().Web.BkLoginCookieName,
-	}
-
-	h := rest.NewHandler()
-	h.Add("GetUser", "GET", "/users", svr.GetUser)
-
-	h.Load(c.WebService)
+// BkLoginResponse is bk login api gateway response
+type BkLoginResponse[T any] struct {
+	Result  bool          `json:"result"`
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Error   *BkLoginError `json:"error"`
+	Data    T             `json:"data"`
 }
 
-type userSvc struct {
-	client            *client.ClientSet
-	loginCli          login.Client
-	bkLoginCookieName string
+// BkLoginError is bk login api gateway error
+type BkLoginError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
-// GetUser get user info
-func (u *userSvc) GetUser(cts *rest.Contexts) (interface{}, error) {
-	cookie, err := cts.Request.Request.Cookie(u.bkLoginCookieName)
-	if err != nil {
-		return nil, err
-	}
-	return u.loginCli.GetUserByToken(cts.Kit, cookie.Value)
+// VerifyTokenRes is the result of the verify token api
+type VerifyTokenRes struct {
+	Username string `json:"bk_username"`
+	TenantID string `json:"tenant_id"`
+}
+
+// UserInfo is the user info
+type UserInfo struct {
+	Username    string `json:"bk_username"`
+	TenantID    string `json:"tenant_id"`
+	DisplayName string `json:"display_name"`
+	Language    string `json:"language"`
+	TimeZone    string `json:"time_zone"`
 }

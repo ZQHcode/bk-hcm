@@ -32,7 +32,7 @@ import (
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
 	"hcm/pkg/rest"
-	"hcm/pkg/thirdparty/esb"
+	"hcm/pkg/thirdparty/api-gateway/login"
 	"hcm/pkg/tools/uuid"
 
 	"github.com/emicklei/go-restful/v3"
@@ -55,7 +55,7 @@ func isITSMCallbackRequest(req *restful.Request) bool {
 	return false
 }
 
-func newCheckLogin(esbClient esb.Client, bkLoginUrl, bkLoginCookieName string) func(
+func newCheckLogin(loginCli login.Client, bkLoginUrl, bkLoginCookieName string) func(
 	*restful.Request) (*rest.Response, error) {
 
 	if bkLoginCookieName == "bk_ticket" {
@@ -92,25 +92,27 @@ func newCheckLogin(esbClient esb.Client, bkLoginUrl, bkLoginCookieName string) f
 		if err != nil || cookie.Value == "" {
 			return nil, fmt.Errorf("%s cookie don't exists", bkLoginCookieName)
 		}
+		kt, err := kit.FromHeader(req.Request.Context(), req.Request.Header)
+		if err != nil {
+			return nil, err
+		}
 		// 校验bk_token是否有效
-		resp, err := esbClient.Login().IsLogin(req.Request.Context(), cookie.Value)
+		resp, err := loginCli.VerifyToken(kt, cookie.Value)
 		if err != nil {
 			return nil, err
 		}
 		return &rest.Response{
-			Code:    int32(resp.Code),
-			Message: resp.Message,
 			Data: loginVerifyRespData{
-				UserName: resp.Data.Username,
+				UserName: resp.Username,
 			},
 		}, nil
 	}
 }
 
 // NewUserAuthenticateFilter ...
-func NewUserAuthenticateFilter(esbClient esb.Client, bkLoginUrl, bkLoginCookieName string) restful.FilterFunction {
+func NewUserAuthenticateFilter(loginCli login.Client, bkLoginUrl, bkLoginCookieName string) restful.FilterFunction {
 
-	checkLogin := newCheckLogin(esbClient, bkLoginUrl, bkLoginCookieName)
+	checkLogin := newCheckLogin(loginCli, bkLoginUrl, bkLoginCookieName)
 
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		var err error

@@ -24,6 +24,7 @@ import (
 	"hcm/pkg/client"
 	"hcm/pkg/iam/auth"
 	"hcm/pkg/thirdparty/api-gateway/itsm"
+	"hcm/pkg/thirdparty/api-gateway/login"
 	"hcm/pkg/thirdparty/api-gateway/notice"
 	"hcm/pkg/thirdparty/esb"
 
@@ -38,4 +39,5 @@ type Capability struct {
 	Authorizer auth.Authorizer
 	ItsmCli    itsm.Client
 	NoticeCli  notice.Client
+	LoginCli   login.Client
 }

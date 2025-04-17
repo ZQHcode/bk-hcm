@@ -327,6 +327,7 @@ type WebServerSetting struct {
 	ChangeLogPath ChangeLogPath `yaml:"changeLogPath"`
 	Notice        Notice        `yaml:"notice"`
 	TemplatePath  string        `yaml:"templatePath"`
+	Login         ApiGateway    `yaml:"login"`
 }
 
 // trySetFlagBindIP try set flag bind ip.
@@ -371,6 +372,10 @@ func (s WebServerSetting) Validate() error {
 	}
 
 	if err := s.Notice.validate(); err != nil {
+		return err
+	}
+
+	if err := s.Login.validate(); err != nil {
 		return err
 	}
 
