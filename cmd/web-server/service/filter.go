@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"strings"
 
+	"hcm/pkg/api/core"
 	"hcm/pkg/criteria/constant"
 	"hcm/pkg/criteria/errf"
 	"hcm/pkg/kit"
@@ -92,13 +93,13 @@ func newCheckLogin(loginCli login.Client, bkLoginUrl, bkLoginCookieName string) 
 		if err != nil || cookie.Value == "" {
 			return nil, fmt.Errorf("%s cookie don't exists", bkLoginCookieName)
 		}
-		kt, err := kit.FromHeader(req.Request.Context(), req.Request.Header)
-		if err != nil {
-			return nil, err
-		}
 		// 校验bk_token是否有效
+		kt := core.NewBackendKit()
+		// todo 待dao层的代码改造合入后，需要调整这个逻辑，如果开启多租户，那么设置租户id为system，不开启则设置为default
+		kt.TenantID = "system"
 		resp, err := loginCli.VerifyToken(kt, cookie.Value)
 		if err != nil {
+			logs.Errorf("verify token failed, err: %v, cookie value: %s, rid: %s", err, cookie.Value, kt.Rid)
 			return nil, err
 		}
 		return &rest.Response{
