@@ -24,16 +24,21 @@ import (
 	"hcm/cmd/web-server/service/capability"
 	"hcm/pkg/cc"
 	"hcm/pkg/client"
+	"hcm/pkg/criteria/constant"
 	"hcm/pkg/rest"
 	"hcm/pkg/thirdparty/api-gateway/login"
 )
 
 // InitUserService initial the userSvc service
 func InitUserService(c *capability.Capability) {
+	bkLoginCookieName := cc.WebServer().Web.BkLoginCookieName
+	if bkLoginCookieName == "" {
+		bkLoginCookieName = constant.BKToken
+	}
 	svr := &userSvc{
 		client:            c.ApiClient,
 		loginCli:          c.LoginCli,
-		bkLoginCookieName: cc.WebServer().Web.BkLoginCookieName,
+		bkLoginCookieName: bkLoginCookieName,
 	}
 
 	h := rest.NewHandler()

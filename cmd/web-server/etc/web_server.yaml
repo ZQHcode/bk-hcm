@@ -79,6 +79,8 @@ web:
   bkCmdbCreateBizUrl: "http://cmdb.bk.com/create_biz"
   # 蓝鲸配置平台创建业务文档跳转链接
   bkCmdbCreateBizDocsUrl: "http://cmdb.bk.com/docs"
+  # 蓝鲸用户管理前端服务网关地址
+  bkUserManageUrl: ""
   # 是否启用云选型
   enableCloudSelection: true
   # 是否启用账单账号功能
