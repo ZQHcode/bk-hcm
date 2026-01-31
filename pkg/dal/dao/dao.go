@@ -35,6 +35,7 @@ import (
 	"hcm/pkg/dal/dao/bill"
 	"hcm/pkg/dal/dao/cloud"
 	daoselection "hcm/pkg/dal/dao/cloud-selection"
+	daoaccountsecret "hcm/pkg/dal/dao/cloud/account-secret"
 	argstpl "hcm/pkg/dal/dao/cloud/argument-template"
 	cloudbill "hcm/pkg/dal/dao/cloud/bill"
 	"hcm/pkg/dal/dao/cloud/cert"
@@ -77,6 +78,7 @@ type Set interface {
 	Auth() auth.Auth
 	Account() cloud.Account
 	SubAccount() daosubaccount.SubAccount
+	AccountSecret() daoaccountsecret.AccountSecret
 	SecurityGroup() securitygroup.SecurityGroup
 	SGCvmRel() sgcvmrel.Interface
 	TCloudSGRule() securitygroup.TCloudSGRule
@@ -343,6 +345,15 @@ func (s *set) Account() cloud.Account {
 // SubAccount return sub account dao.
 func (s *set) SubAccount() daosubaccount.SubAccount {
 	return &daosubaccount.SubAccountDao{
+		Orm:   s.orm,
+		IDGen: s.idGen,
+		Audit: s.audit,
+	}
+}
+
+// AccountSecret return account secret dao.
+func (s *set) AccountSecret() daoaccountsecret.AccountSecret {
+	return &daoaccountsecret.AccountSecretDao{
 		Orm:   s.orm,
 		IDGen: s.idGen,
 		Audit: s.audit,

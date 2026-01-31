@@ -17,34 +17,36 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package types
+// Package accountsecret defines account secret core structures.
+package accountsecret
 
 import (
-	"hcm/pkg/dal/table/cloud"
-	tableaccountsecret "hcm/pkg/dal/table/cloud/account-secret"
-	tableaccount "hcm/pkg/dal/table/cloud/sub-account"
+	"hcm/pkg/api/core"
+	"hcm/pkg/criteria/enumor"
 )
 
-// ListAccountDetails list account details.
-type ListAccountDetails struct {
-	Count   uint64                `json:"count,omitempty"`
-	Details []*cloud.AccountTable `json:"details,omitempty"`
+// BaseAccountSecret 账号密钥基础信息
+type BaseAccountSecret struct {
+	ID             string                     `json:"id"`
+	Vendor         enumor.Vendor              `json:"vendor"`
+	Type           enumor.AccountSecretType   `json:"type"`
+	Status         enumor.AccountSecretStatus `json:"status"`
+	TenantID       string                     `json:"tenant_id"`
+	*core.Revision `json:",inline"`
 }
 
-// ListSubAccountDetails list sub account details.
-type ListSubAccountDetails struct {
-	Count   uint64               `json:"count,omitempty"`
-	Details []tableaccount.Table `json:"details,omitempty"`
+// AccountSecret 账号密钥（带 Extension）
+type AccountSecret[Ext Extension] struct {
+	BaseAccountSecret `json:",inline"`
+	Extension         *Ext `json:"extension"`
 }
 
-// ListAccountSecretDetails list account secret details.
-type ListAccountSecretDetails struct {
-	Count   uint64                     `json:"count,omitempty"`
-	Details []tableaccountsecret.Table `json:"details,omitempty"`
+// GetID 获取 ID
+func (a AccountSecret[T]) GetID() string {
+	return a.BaseAccountSecret.ID
 }
 
-// Account ...
-type Account struct {
-	cloud.AccountTable `json:",inline"`
-	UsageBizIDs        []int64 `db:"usage_biz_ids" json:"usage_biz_ids"`
+// Extension 账号密钥扩展字段接口
+type Extension interface {
+	TCloudAccountSecretExtension
 }

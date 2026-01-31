@@ -17,34 +17,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package types
+package accountsecret
 
-import (
-	"hcm/pkg/dal/table/cloud"
-	tableaccountsecret "hcm/pkg/dal/table/cloud/account-secret"
-	tableaccount "hcm/pkg/dal/table/cloud/sub-account"
-)
-
-// ListAccountDetails list account details.
-type ListAccountDetails struct {
-	Count   uint64                `json:"count,omitempty"`
-	Details []*cloud.AccountTable `json:"details,omitempty"`
-}
-
-// ListSubAccountDetails list sub account details.
-type ListSubAccountDetails struct {
-	Count   uint64               `json:"count,omitempty"`
-	Details []tableaccount.Table `json:"details,omitempty"`
-}
-
-// ListAccountSecretDetails list account secret details.
-type ListAccountSecretDetails struct {
-	Count   uint64                     `json:"count,omitempty"`
-	Details []tableaccountsecret.Table `json:"details,omitempty"`
-}
-
-// Account ...
-type Account struct {
-	cloud.AccountTable `json:",inline"`
-	UsageBizIDs        []int64 `db:"usage_biz_ids" json:"usage_biz_ids"`
+// TCloudAccountSecretExtension 腾讯云账号密钥扩展
+type TCloudAccountSecretExtension struct {
+	CloudSecretID      string `json:"cloud_secret_id"`
+	CloudSecretKey     string `json:"cloud_secret_key"`
+	CloudMainAccountID string `json:"cloud_main_account_id"`
+	CloudSubAccountID  string `json:"cloud_sub_account_id"`
 }

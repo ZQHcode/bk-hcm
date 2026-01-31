@@ -28,7 +28,9 @@ type AuditResourceType string
 
 // AuditResourceType 资源审计类型
 const (
-	SubAccountAuditResType        AuditResourceType = "sub_account"
+	SubAccountAuditResType AuditResourceType = "sub_account"
+	// AccountSecretAuditResType is account secret audit resource type
+	AccountSecretAuditResType     AuditResourceType = "account_secret"
 	AccountAuditResType           AuditResourceType = "account"
 	SecurityGroupAuditResType     AuditResourceType = "security_group"
 	SecurityGroupRuleAuditResType AuditResourceType = "security_group_rule"
@@ -55,6 +57,7 @@ const (
 // AuditResourceTypeEnums resource type map.
 var AuditResourceTypeEnums = map[AuditResourceType]struct{}{
 	SubAccountAuditResType:        {},
+	AccountSecretAuditResType:     {},
 	AccountAuditResType:           {},
 	SecurityGroupAuditResType:     {},
 	SecurityGroupRuleAuditResType: {},

@@ -96,3 +96,47 @@ var (
 		ChinaSite:         "中国站",
 	}
 )
+
+// AccountSecretType is account secret type.
+type AccountSecretType string
+
+// Validate the AccountSecretType is valid or not
+func (a AccountSecretType) Validate() error {
+	switch a {
+	case ResourceSecretType:
+	case SecuritySecretType:
+	default:
+		return fmt.Errorf("unsupported account secret type: %s", a)
+	}
+
+	return nil
+}
+
+const (
+	// ResourceSecretType 资源管理密钥
+	ResourceSecretType AccountSecretType = "resource"
+	// SecuritySecretType 安全管理密钥
+	SecuritySecretType AccountSecretType = "security"
+)
+
+// AccountSecretStatus is account secret status.
+type AccountSecretStatus string
+
+// Validate the AccountSecretStatus is valid or not
+func (a AccountSecretStatus) Validate() error {
+	switch a {
+	case NormalSecretStatus:
+	case InvalidSecretStatus:
+	default:
+		return fmt.Errorf("unsupported account secret status: %s", a)
+	}
+
+	return nil
+}
+
+const (
+	// NormalSecretStatus 正常状态
+	NormalSecretStatus AccountSecretStatus = "normal"
+	// InvalidSecretStatus 失效状态
+	InvalidSecretStatus AccountSecretStatus = "invalid"
+)

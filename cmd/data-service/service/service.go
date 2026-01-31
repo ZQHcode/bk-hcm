@@ -50,6 +50,7 @@ import (
 	cloudselection "hcm/cmd/data-service/service/cloud-selection"
 	"hcm/cmd/data-service/service/cloud/account"
 	accountbizrel "hcm/cmd/data-service/service/cloud/account-biz-rel"
+	accountsecret "hcm/cmd/data-service/service/cloud/account-secret"
 	argstpl "hcm/cmd/data-service/service/cloud/argument-template"
 	"hcm/cmd/data-service/service/cloud/bill"
 	"hcm/cmd/data-service/service/cloud/cert"
@@ -232,6 +233,7 @@ func (s *Service) apiSet() *restful.Container {
 	zone.InitZoneService(capability)
 	image.InitService(capability)
 	cvm.InitService(capability)
+	accountsecret.InitService(capability)
 	sgcvmrel.InitService(capability)
 	routetable.InitRouteTableService(capability)
 	application.InitApplicationService(capability)
