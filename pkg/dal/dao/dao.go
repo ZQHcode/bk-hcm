@@ -56,6 +56,7 @@ import (
 	sgcomrel "hcm/pkg/dal/dao/cloud/security-group-common-rel"
 	sgcvmrel "hcm/pkg/dal/dao/cloud/security-group-cvm-rel"
 	daosubaccount "hcm/pkg/dal/dao/cloud/sub-account"
+	daosubaccountsecret "hcm/pkg/dal/dao/cloud/sub-account-secret"
 	daosync "hcm/pkg/dal/dao/cloud/sync"
 	"hcm/pkg/dal/dao/cloud/zone"
 	globalconfig "hcm/pkg/dal/dao/global-config"
@@ -78,6 +79,7 @@ type Set interface {
 	Auth() auth.Auth
 	Account() cloud.Account
 	SubAccount() daosubaccount.SubAccount
+	SubAccountSecret() daosubaccountsecret.SubAccountSecret
 	AccountSecret() daoaccountsecret.AccountSecret
 	SecurityGroup() securitygroup.SecurityGroup
 	SGCvmRel() sgcvmrel.Interface
@@ -345,6 +347,15 @@ func (s *set) Account() cloud.Account {
 // SubAccount return sub account dao.
 func (s *set) SubAccount() daosubaccount.SubAccount {
 	return &daosubaccount.SubAccountDao{
+		Orm:   s.orm,
+		IDGen: s.idGen,
+		Audit: s.audit,
+	}
+}
+
+// SubAccountSecret return sub account secret dao.
+func (s *set) SubAccountSecret() daosubaccountsecret.SubAccountSecret {
+	return &daosubaccountsecret.SubAccountSecretDao{
 		Orm:   s.orm,
 		IDGen: s.idGen,
 		Audit: s.audit,

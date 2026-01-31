@@ -71,6 +71,7 @@ import (
 	sgcomrel "hcm/cmd/data-service/service/cloud/security-group-common-rel"
 	sgcvmrel "hcm/cmd/data-service/service/cloud/security-group-cvm-rel"
 	subaccount "hcm/cmd/data-service/service/cloud/sub-account"
+	subaccountsecret "hcm/cmd/data-service/service/cloud/sub-account-secret"
 	sync "hcm/cmd/data-service/service/cloud/sync"
 	"hcm/cmd/data-service/service/cloud/zone"
 	"hcm/cmd/data-service/service/cos"
@@ -234,6 +235,7 @@ func (s *Service) apiSet() *restful.Container {
 	image.InitService(capability)
 	cvm.InitService(capability)
 	accountsecret.InitService(capability)
+	subaccountsecret.InitService(capability)
 	sgcvmrel.InitService(capability)
 	routetable.InitRouteTableService(capability)
 	application.InitApplicationService(capability)

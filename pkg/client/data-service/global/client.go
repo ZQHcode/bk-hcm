@@ -40,6 +40,7 @@ type Client struct {
 	NetworkInterface       *NetworkInterfaceClient
 	NetworkInterfaceCvmRel *NetworkInterfaceCvmRelClient
 	SubAccount             *SubAccountClient
+	SubAccountSecret       *SubAccountSecretClient
 	AccountSyncDetail      *AccountSyncDetailClient
 
 	Auth          *AuthClient
@@ -94,6 +95,7 @@ func NewClient(client rest.ClientInterface) *Client {
 		NetworkInterface:       NewNetworkInterfaceClient(client),
 		NetworkInterfaceCvmRel: NewNetworkInterfaceCvmRelClient(client),
 		SubAccount:             NewSubAccountClient(client),
+		SubAccountSecret:       NewSubAccountSecretClient(client),
 		AccountSyncDetail:      NewAccountSyncDetailClient(client),
 
 		Auth:          NewAuthClient(client),

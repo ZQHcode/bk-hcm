@@ -44,3 +44,25 @@ const (
 	// CurrentAccount 当前账号
 	CurrentAccount SubAccountType = "current_account"
 )
+
+// SubAccountSecretStatus is sub account secret status.
+type SubAccountSecretStatus string
+
+// Validate the SubAccountSecretStatus is valid or not
+func (s SubAccountSecretStatus) Validate() error {
+	switch s {
+	case EnabledSecretStatus:
+	case DisabledSecretStatus:
+	default:
+		return fmt.Errorf("unsupported sub account secret status: %s", s)
+	}
+
+	return nil
+}
+
+const (
+	// EnabledSecretStatus 启用状态
+	EnabledSecretStatus SubAccountSecretStatus = "enabled"
+	// DisabledSecretStatus 禁用状态
+	DisabledSecretStatus SubAccountSecretStatus = "disabled"
+)

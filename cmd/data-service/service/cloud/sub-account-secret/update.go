@@ -17,19 +17,19 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package accountsecret
+package subaccountsecret
 
 import (
 	"fmt"
 
 	"hcm/pkg/api/core"
-	coreas "hcm/pkg/api/core/cloud/account-secret"
+	coresass "hcm/pkg/api/core/cloud/sub-account-secret"
 	protocloud "hcm/pkg/api/data-service/cloud"
 	"hcm/pkg/criteria/enumor"
 	"hcm/pkg/criteria/errf"
 	"hcm/pkg/dal/dao/tools"
 	"hcm/pkg/dal/dao/types"
-	tableas "hcm/pkg/dal/table/cloud/account-secret"
+	tablesass "hcm/pkg/dal/table/cloud/sub-account-secret"
 	tabletype "hcm/pkg/dal/table/types"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
@@ -38,8 +38,8 @@ import (
 	"hcm/pkg/tools/json"
 )
 
-// BatchUpdateAccountSecret batch update account secret.
-func (svc *accountSecretSvc) BatchUpdateAccountSecret(cts *rest.Contexts) (interface{}, error) {
+// BatchUpdateSubAccountSecret batch update sub account secret.
+func (svc *subAccountSecretSvc) BatchUpdateSubAccountSecret(cts *rest.Contexts) (interface{}, error) {
 	vendor := enumor.Vendor(cts.PathParameter("vendor").String())
 	if err := vendor.Validate(); err != nil {
 		return nil, errf.NewFromErr(errf.InvalidParameter, err)
@@ -53,8 +53,8 @@ func (svc *accountSecretSvc) BatchUpdateAccountSecret(cts *rest.Contexts) (inter
 	}
 }
 
-func batchUpdateForTCloud(svc *accountSecretSvc, cts *rest.Contexts) (interface{}, error) {
-	req := new(protocloud.AccountSecretBatchUpdateReq[coreas.TCloudAccountSecretExtension])
+func batchUpdateForTCloud(svc *subAccountSecretSvc, cts *rest.Contexts) (interface{}, error) {
+	req := new(protocloud.SubAccountSecretBatchUpdateReq[coresass.TCloudSubAccountSecretExtension])
 	if err := cts.DecodeInto(req); err != nil {
 		return nil, errf.NewFromErr(errf.DecodeRequestFailed, err)
 	}
@@ -63,39 +63,35 @@ func batchUpdateForTCloud(svc *accountSecretSvc, cts *rest.Contexts) (interface{
 		return nil, errf.NewFromErr(errf.InvalidParameter, err)
 	}
 
-	models := make([]tableas.Table, 0, len(req.AccountSecrets))
-	for _, one := range req.AccountSecrets {
-		model := tableas.Table{
+	models := make([]tablesass.Table, 0, len(req.SubAccountSecrets))
+	for _, one := range req.SubAccountSecrets {
+		model := tablesass.Table{
 			ID:      one.ID,
 			Reviser: cts.Kit.User,
-		}
-
-		if one.Type != nil {
-			model.Type = cvt.PtrToVal(one.Type)
 		}
 
 		if one.Status != nil {
 			model.Status = cvt.PtrToVal(one.Status)
 		}
+		if one.CloudCreatedAt != nil {
+			model.CloudCreatedAt = tabletype.Time(cvt.PtrToVal(one.CloudCreatedAt))
+		}
+		if one.DisabledTime != nil {
+			model.DisabledTime = tabletype.Time(cvt.PtrToVal(one.DisabledTime))
+		}
+		if one.LastUsedTime != nil {
+			model.LastUsedTime = tabletype.Time(cvt.PtrToVal(one.LastUsedTime))
+		}
 
-		// 只有提供了 Extension 才进行更新
 		if one.Extension != nil {
-			// 转换为 DataService 的 Extension（带加密方法）
-			dsExt := &protocloud.TCloudAccountSecretExtension{
-				TCloudAccountSecretExtension: cvt.PtrToVal(one.Extension),
-			}
-
-			// 加密 extension 中的 SecretKey
-			dsExt.EncryptSecretKey(svc.cipher)
-
 			// 查询原有数据以合并 extension
-			dbModel, err := getAccountSecretFromTable(cts.Kit, one.ID, svc)
+			dbModel, err := getSubAccountSecretFromTable(cts.Kit, one.ID, svc)
 			if err != nil {
 				return nil, err
 			}
 
 			// 合并覆盖 dbExtension
-			updatedExtension, err := json.UpdateMerge(dsExt, string(dbModel.Extension))
+			updatedExtension, err := json.UpdateMerge(cvt.PtrToVal(one.Extension), string(dbModel.Extension))
 			if err != nil {
 				return nil, fmt.Errorf("json UpdateMerge extension failed, err: %v", err)
 			}
@@ -106,32 +102,30 @@ func batchUpdateForTCloud(svc *accountSecretSvc, cts *rest.Contexts) (interface{
 		models = append(models, model)
 	}
 
-	if err := svc.dao.AccountSecret().BatchUpdate(cts.Kit, models); err != nil {
-		logs.Errorf("batch update account secret failed, err: %v, rid: %s", err, cts.Kit.Rid)
+	if err := svc.dao.SubAccountSecret().BatchUpdate(cts.Kit, models); err != nil {
+		logs.Errorf("batch update sub account secret failed, err: %v, rid: %s", err, cts.Kit.Rid)
 		return nil, err
 	}
 
 	return nil, nil
 }
 
-// getAccountSecretFromTable 从数据库查询账号密钥
-func getAccountSecretFromTable(kt *kit.Kit, id string, svc *accountSecretSvc) (
-	*tableas.Table, error) {
-
+// getSubAccountSecretFromTable 从数据库查询子账号密钥
+func getSubAccountSecretFromTable(kt *kit.Kit, id string, svc *subAccountSecretSvc) (*tablesass.Table, error) {
 	opt := &types.ListOption{
 		Filter: tools.EqualExpression("id", id),
 		Page:   &core.BasePage{Count: false, Start: 0, Limit: 1},
 	}
 
-	listResult, err := svc.dao.AccountSecret().List(kt, opt)
+	listResult, err := svc.dao.SubAccountSecret().List(kt, opt)
 	if err != nil {
-		logs.Errorf("list account secret failed, err: %v, rid: %s", err, kt.Rid)
-		return nil, fmt.Errorf("list account secret failed, err: %v", err)
+		logs.Errorf("list sub account secret failed, err: %v, rid: %s", err, kt.Rid)
+		return nil, fmt.Errorf("list sub account secret failed, err: %v", err)
 	}
 
 	details := listResult.Details
 	if len(details) != 1 {
-		return nil, fmt.Errorf("list account secret failed, account_secret(id=%s) don't exist", id)
+		return nil, fmt.Errorf("list sub account secret failed, sub_account_secret(id=%s) don't exist", id)
 	}
 
 	return &details[0], nil
