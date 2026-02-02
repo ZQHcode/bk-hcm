@@ -34,16 +34,32 @@ import (
 
 // TCloudAccountExtensionCreateReq ...
 type TCloudAccountExtensionCreateReq struct {
-	CloudMainAccountID string `json:"cloud_main_account_id" validate:"required"`
-	CloudSubAccountID  string `json:"cloud_sub_account_id" validate:"required"`
-	CloudSecretID      string `json:"cloud_secret_id" validate:"omitempty"`
-	CloudSecretKey     string `json:"cloud_secret_key" validate:"omitempty"`
+	CloudMainAccountID string                        `json:"cloud_main_account_id" validate:"required"`
+	CloudSubAccountID  string                        `json:"cloud_sub_account_id" validate:"required"`
+	CloudSecretID      string                        `json:"cloud_secret_id" validate:"omitempty"`
+	CloudSecretKey     string                        `json:"cloud_secret_key" validate:"omitempty"`
+	LoginFlag          *enumor.AccountProtectionFlag `json:"login_flag" validate:"omitempty"`
+	ActionFlag         *enumor.AccountProtectionFlag `json:"action_flag" validate:"omitempty"`
 }
 
 // Validate ...
 func (req *TCloudAccountExtensionCreateReq) Validate(accountType enumor.AccountType) error {
 	if err := validator.Validate.Struct(req); err != nil {
 		return err
+	}
+
+	// 校验 LoginFlag
+	if req.LoginFlag != nil {
+		if err := req.LoginFlag.Validate(); err != nil {
+			return fmt.Errorf("invalid login_flag: %w", err)
+		}
+	}
+
+	// 校验 ActionFlag
+	if req.ActionFlag != nil {
+		if err := req.ActionFlag.Validate(); err != nil {
+			return fmt.Errorf("invalid action_flag: %w", err)
+		}
 	}
 
 	// 登记账号密钥可为空，其他类型则必填

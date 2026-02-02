@@ -140,3 +140,40 @@ const (
 	// InvalidSecretStatus 失效状态
 	InvalidSecretStatus AccountSecretStatus = "invalid"
 )
+
+// AccountProtectionFlag is account protection flag.
+type AccountProtectionFlag string
+
+// Validate the AccountProtectionFlag is valid or not
+func (a AccountProtectionFlag) Validate() error {
+	switch a {
+	case PhoneProtection:
+	case TokenProtection:
+	case StokenProtection:
+	case WechatProtection:
+	case CustomProtection:
+	case MailProtection:
+	case U2FTokenProtection:
+	default:
+		return fmt.Errorf("unsupported account protection flag: %s", a)
+	}
+
+	return nil
+}
+
+const (
+	// PhoneProtection 安全手机
+	PhoneProtection AccountProtectionFlag = "phone"
+	// TokenProtection 硬token
+	TokenProtection AccountProtectionFlag = "token"
+	// StokenProtection MFA字段
+	StokenProtection AccountProtectionFlag = "stoken"
+	// WechatProtection 微信
+	WechatProtection AccountProtectionFlag = "wechat"
+	// CustomProtection 自定义
+	CustomProtection AccountProtectionFlag = "custom"
+	// MailProtection 邮箱
+	MailProtection AccountProtectionFlag = "mail"
+	// U2FTokenProtection u2f硬件token
+	U2FTokenProtection AccountProtectionFlag = "u2FToken"
+)

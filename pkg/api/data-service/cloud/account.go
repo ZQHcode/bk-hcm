@@ -125,14 +125,17 @@ func (req *AzureAccountExtensionCreateReq) EncryptSecretKey(cipher cryptography.
 
 // AccountCreateReq ...
 type AccountCreateReq[T AccountExtensionCreateReq] struct {
-	Name        string                 `json:"name" validate:"required"`
-	Managers    []string               `json:"managers" validate:"required"`
-	Type        enumor.AccountType     `json:"type" validate:"required"`
-	Site        enumor.AccountSiteType `json:"site" validate:"required"`
-	Memo        *string                `json:"memo" validate:"required"`
-	Extension   *T                     `json:"extension" validate:"required"`
-	BkBizID     int64                  `json:"bk_biz_id" validate:"omitempty"`
-	UsageBizIDs []int64                `json:"usage_biz_ids" validate:"required"`
+	Name             string                 `json:"name" validate:"required"`
+	Managers         []string               `json:"managers" validate:"required"`
+	Type             enumor.AccountType     `json:"type" validate:"required"`
+	Site             enumor.AccountSiteType `json:"site" validate:"required"`
+	Memo             *string                `json:"memo" validate:"required"`
+	Extension        *T                     `json:"extension" validate:"required"`
+	BkBizID          int64                  `json:"bk_biz_id" validate:"omitempty"`
+	UsageBizIDs      []int64                `json:"usage_biz_ids" validate:"required"`
+	Email            *string                `json:"email" validate:"omitempty"`
+	SecurityManagers []string               `json:"security_managers" validate:"omitempty"`
+	CloudCreatedAt   *string                `json:"cloud_created_at" validate:"omitempty"`
 }
 
 // Validate ...
@@ -258,6 +261,9 @@ type AccountUpdateReq[T AccountExtensionUpdateReq] struct {
 	RecycleReserveTime int      `json:"recycle_reserve_time" validate:"omitempty"`
 	BkBizID            int64    `json:"bk_biz_id" validate:"omitempty"`
 	Extension          *T       `json:"extension" validate:"omitempty"`
+	Email              *string  `json:"email" validate:"omitempty"`
+	SecurityManagers   []string `json:"security_managers" validate:"omitempty"`
+	CloudCreatedAt     *string  `json:"cloud_created_at" validate:"omitempty"`
 }
 
 // Validate ...

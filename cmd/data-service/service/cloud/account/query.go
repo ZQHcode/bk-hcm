@@ -36,6 +36,7 @@ import (
 	"hcm/pkg/rest"
 	"hcm/pkg/runtime/filter"
 	"hcm/pkg/tools/converter"
+	cvt "hcm/pkg/tools/converter"
 	"hcm/pkg/tools/json"
 )
 
@@ -106,12 +107,19 @@ func (svc *service) GetAccount(cts *rest.Contexts) (interface{}, error) {
 		BkBizID:            dbAccount.BkBizID,
 		UsageBizIDs:        usageBizIDs,
 		RecycleReserveTime: dbAccount.RecycleReserveTime,
+		Email:              dbAccount.Email,
+		SecurityManagers:   dbAccount.SecurityManagers,
 		Revision: core.Revision{
 			Creator:   dbAccount.Creator,
 			Reviser:   dbAccount.Reviser,
 			CreatedAt: dbAccount.CreatedAt.String(),
 			UpdatedAt: dbAccount.UpdatedAt.String(),
 		},
+	}
+
+	if dbAccount.CloudCreatedAt != nil {
+		cloudCreatedAt := dbAccount.CloudCreatedAt.String()
+		baseAccount.CloudCreatedAt = cvt.ValToPtr(cloudCreatedAt)
 	}
 
 	// 转换为最终的数据结构
@@ -168,7 +176,7 @@ func (svc *service) ListAccount(cts *rest.Contexts) (interface{}, error) {
 	details := make([]*protocore.BaseAccount, 0, len(daoAccountResp.Details))
 	for _, account := range daoAccountResp.Details {
 		ids = append(ids, account.ID)
-		details = append(details, &protocore.BaseAccount{
+		baseAccount := &protocore.BaseAccount{
 			ID:                 account.ID,
 			Vendor:             enumor.Vendor(account.Vendor),
 			Name:               account.Name,
@@ -180,13 +188,20 @@ func (svc *service) ListAccount(cts *rest.Contexts) (interface{}, error) {
 			Memo:               account.Memo,
 			RecycleReserveTime: account.RecycleReserveTime,
 			BkBizID:            account.BkBizID,
+			Email:              account.Email,
+			SecurityManagers:   account.SecurityManagers,
 			Revision: core.Revision{
 				Creator:   account.Creator,
 				Reviser:   account.Reviser,
 				CreatedAt: account.CreatedAt.String(),
 				UpdatedAt: account.UpdatedAt.String(),
 			},
-		})
+		}
+		if account.CloudCreatedAt != nil {
+			cloudCreatedAt := account.CloudCreatedAt.String()
+			baseAccount.CloudCreatedAt = cvt.ValToPtr(cloudCreatedAt)
+		}
+		details = append(details, baseAccount)
 	}
 
 	// 查询账号业务信息，并赋值
@@ -369,27 +384,34 @@ func (svc *service) ListAccountWithExtension(cts *rest.Contexts) (interface{}, e
 		}
 
 		ids = append(ids, account.ID)
-		details = append(details, &protocloud.BaseAccountWithExtensionListResp{
-			BaseAccount: protocore.BaseAccount{
-				ID:                 account.ID,
-				Vendor:             enumor.Vendor(account.Vendor),
-				Name:               account.Name,
-				Managers:           account.Managers,
-				Type:               enumor.AccountType(account.Type),
-				Site:               enumor.AccountSiteType(account.Site),
-				Price:              account.Price,
-				PriceUnit:          account.PriceUnit,
-				Memo:               account.Memo,
-				RecycleReserveTime: account.RecycleReserveTime,
-				BkBizID:            account.BkBizID,
-				Revision: core.Revision{
-					Creator:   account.Creator,
-					Reviser:   account.Reviser,
-					CreatedAt: account.CreatedAt.String(),
-					UpdatedAt: account.UpdatedAt.String(),
-				},
+		baseAccount := protocore.BaseAccount{
+			ID:                 account.ID,
+			Vendor:             enumor.Vendor(account.Vendor),
+			Name:               account.Name,
+			Managers:           account.Managers,
+			Type:               enumor.AccountType(account.Type),
+			Site:               enumor.AccountSiteType(account.Site),
+			Price:              account.Price,
+			PriceUnit:          account.PriceUnit,
+			Memo:               account.Memo,
+			RecycleReserveTime: account.RecycleReserveTime,
+			BkBizID:            account.BkBizID,
+			Email:              account.Email,
+			SecurityManagers:   account.SecurityManagers,
+			Revision: core.Revision{
+				Creator:   account.Creator,
+				Reviser:   account.Reviser,
+				CreatedAt: account.CreatedAt.String(),
+				UpdatedAt: account.UpdatedAt.String(),
 			},
-			Extension: extension,
+		}
+		if account.CloudCreatedAt != nil {
+			cloudCreatedAt := account.CloudCreatedAt.String()
+			baseAccount.CloudCreatedAt = cvt.ValToPtr(cloudCreatedAt)
+		}
+		details = append(details, &protocloud.BaseAccountWithExtensionListResp{
+			BaseAccount: baseAccount,
+			Extension:   extension,
 		})
 	}
 
