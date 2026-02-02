@@ -66,3 +66,25 @@ const (
 	// DisabledSecretStatus 禁用状态
 	DisabledSecretStatus SubAccountSecretStatus = "disabled"
 )
+
+// SubAccountConsoleLogin is sub account console login type.
+type SubAccountConsoleLogin int64
+
+// Validate the SubAccountConsoleLogin is valid or not
+func (s SubAccountConsoleLogin) Validate() error {
+	switch s {
+	case ProgramAccount:
+	case ConsoleAccount:
+	default:
+		return fmt.Errorf("unsupported sub account console login type: %d", s)
+	}
+
+	return nil
+}
+
+const (
+	// ProgramAccount 编程账号，无法登录控制台
+	ProgramAccount SubAccountConsoleLogin = 0
+	// ConsoleAccount 控制台账号，可登录控制台
+	ConsoleAccount SubAccountConsoleLogin = 1
+)
