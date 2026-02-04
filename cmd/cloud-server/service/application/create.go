@@ -109,7 +109,9 @@ func (a *applicationSvc) create(cts *rest.Contexts, req *proto.CreateCommonReq,
 
 // createApplicationRequest ...
 func (a *applicationSvc) createApplication(cts *rest.Contexts, req *proto.CreateCommonReq,
-	handler handlers.ApplicationHandler, sn string, applicationType enumor.ApplicationType) (*core.CreateResult, error) {
+	handler handlers.ApplicationHandler, sn string, applicationType enumor.ApplicationType) (*core.CreateResult,
+	error) {
+
 	// 调用DB创建单据
 	content, err := json.MarshalToString(handler.GenerateApplicationContent())
 	if err != nil {
@@ -197,23 +199,58 @@ func parseReqFromRequestBody[T any](cts *rest.Contexts) (*T, error) {
 
 // CreateForAddAccount ...
 func (a *applicationSvc) CreateForAddAccount(cts *rest.Contexts) (interface{}, error) {
-	commReq, err := decodeCommonReqAndValidate(cts)
+	// authorize
+	authRes := meta.ResourceAttribute{Basic: &meta.Basic{Type: meta.Account, Action: meta.Import}}
+	err := a.authorizer.AuthorizeWithPerm(cts.Kit, authRes)
 	if err != nil {
-		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+		return nil, err
 	}
 
 	req, err := parseReqFromRequestBody[proto.AccountAddReq](cts)
 	if err != nil {
 		return nil, err
 	}
-	handler := accounthandler.NewApplicationOfAddAccount(a.getHandlerOption(cts), a.authorizer, req)
+	return a.createForAddAccount(cts, req)
+}
 
-	// authorize
-	authRes := meta.ResourceAttribute{Basic: &meta.Basic{Type: meta.Account, Action: meta.Import}}
-	err = a.authorizer.AuthorizeWithPerm(cts.Kit, authRes)
+// CreateBizForAddAccount create biz for add account
+func (a *applicationSvc) CreateBizForAddAccount(cts *rest.Contexts) (interface{}, error) {
+	bizID, err := cts.PathParameter("bk_biz_id").Int64()
 	if err != nil {
 		return nil, err
 	}
+	if bizID <= 0 {
+		return nil, errf.New(errf.InvalidParameter, "biz id is invalid")
+	}
+
+	attribute := meta.ResourceAttribute{Basic: &meta.Basic{Type: meta.Biz, Action: meta.Access}, BizID: bizID}
+	_, authorized, err := a.authorizer.Authorize(cts.Kit, attribute)
+	if err != nil {
+		return nil, err
+	}
+	if !authorized {
+		return nil, errf.New(errf.PermissionDenied, "biz permission denied")
+	}
+
+	req, err := parseReqFromRequestBody[proto.AccountAddReq](cts)
+	if err != nil {
+		return nil, err
+	}
+	if req.BkBizID != bizID {
+		return nil, errf.Newf(errf.InvalidParameter,
+			"path bk_biz_id(%d) does not match request body bk_biz_id(%d)", bizID, req.BkBizID)
+	}
+
+	return a.createForAddAccount(cts, req)
+}
+
+func (a *applicationSvc) createForAddAccount(cts *rest.Contexts, req *proto.AccountAddReq) (interface{}, error) {
+	commReq, err := decodeCommonReqAndValidate(cts)
+	if err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+
+	handler := accounthandler.NewApplicationOfAddAccount(a.getHandlerOption(cts), a.authorizer, req)
 
 	return a.create(cts, commReq, handler)
 }
