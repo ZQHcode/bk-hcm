@@ -203,6 +203,7 @@ type OtherAccountExtensionUpdateReq struct {
 type AccountUpdateReq struct {
 	Name               string          `json:"name" validate:"omitempty"`
 	Managers           []string        `json:"managers" validate:"omitempty,max=5"`
+	SecurityManagers   []string        `json:"security_managers" validate:"omitempty,max=5"`
 	Memo               *string         `json:"memo" validate:"omitempty"`
 	RecycleReserveTime int             `json:"recycle_reserve_time" validate:"omitempty"`
 	BkBizID            int64           `json:"bk_biz_id" validate:"omitempty"`
