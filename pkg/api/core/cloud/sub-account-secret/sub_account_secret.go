@@ -30,6 +30,8 @@ type BaseSubAccountSecret struct {
 	ID             string                        `json:"id"`
 	Vendor         enumor.Vendor                 `json:"vendor"`
 	Status         enumor.SubAccountSecretStatus `json:"status"`
+	AccountID      string                        `json:"account_id"`
+	SubAccountID   string                        `json:"sub_account_id"`
 	CloudCreatedAt string                        `json:"cloud_created_at"`
 	DisabledTime   string                        `json:"disabled_time"`
 	LastUsedTime   string                        `json:"last_used_time"`

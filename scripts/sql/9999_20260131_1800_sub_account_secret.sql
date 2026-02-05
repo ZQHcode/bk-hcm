@@ -29,6 +29,8 @@ START TRANSACTION;
 -- 1. 子账号密钥表
 CREATE TABLE IF NOT EXISTS `sub_account_secret` (
     `id` varchar(64) NOT NULL COMMENT '密钥ID',
+    `account_id` varchar(64) NOT NULL COMMENT '账号ID',
+    `sub_account_id` varchar(64) NOT NULL COMMENT '子账号ID',
     `vendor` varchar(16) NOT NULL COMMENT '云厂商',
     `status` varchar(16) NOT NULL COMMENT '密钥状态(enabled:启用 disabled:禁用)',
     `extension` json NOT NULL COMMENT '云厂商差异扩展字段',
@@ -44,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `sub_account_secret` (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_bin COMMENT='子账号密钥表';
+
+CREATE INDEX idx_sub_account_id ON sub_account_secret(sub_account_id);
 
 INSERT INTO id_generator(`resource`, `max_id`)
 VALUES ('sub_account_secret', '0');

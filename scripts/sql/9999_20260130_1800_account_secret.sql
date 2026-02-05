@@ -29,6 +29,7 @@ START TRANSACTION;
 -- 1. 账号密钥表
 CREATE TABLE IF NOT EXISTS `account_secret` (
     `id` varchar(64) NOT NULL COMMENT '密钥ID',
+    `account_id` varchar(64) NOT NULL COMMENT '账号ID',
     `vendor` varchar(16) NOT NULL COMMENT '云厂商',
     `type` varchar(16) NOT NULL COMMENT '密钥类型(resource:资源管理 security:安全管理)',
     `status` varchar(16) NOT NULL COMMENT '密钥状态(normal:正常 invalid:失效)',
@@ -42,6 +43,8 @@ CREATE TABLE IF NOT EXISTS `account_secret` (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_bin COMMENT='账号密钥表';
+
+CREATE INDEX idx_account_id ON account_secret(account_id);
 
 INSERT INTO id_generator(`resource`, `max_id`)
 VALUES ('account_secret', '0');

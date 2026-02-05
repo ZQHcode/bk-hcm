@@ -85,6 +85,7 @@ func batchCreateForTCloud(vendor enumor.Vendor, svc *accountSecretSvc, cts *rest
 				Type:      one.Type,
 				Status:    one.Status,
 				Extension: tabletype.JsonField(extensionJson),
+				AccountID: one.AccountID,
 				Creator:   cts.Kit.User,
 				Reviser:   cts.Kit.User,
 			})

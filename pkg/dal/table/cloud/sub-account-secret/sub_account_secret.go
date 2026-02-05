@@ -38,6 +38,8 @@ var ColumnDescriptor = utils.ColumnDescriptors{
 	{Column: "vendor", NamedC: "vendor", Type: enumor.String},
 	{Column: "status", NamedC: "status", Type: enumor.String},
 	{Column: "extension", NamedC: "extension", Type: enumor.Json},
+	{Column: "account_id", NamedC: "account_id", Type: enumor.String},
+	{Column: "sub_account_id", NamedC: "sub_account_id", Type: enumor.String},
 	{Column: "tenant_id", NamedC: "tenant_id", Type: enumor.String},
 	{Column: "cloud_created_at", NamedC: "cloud_created_at", Type: enumor.Time},
 	{Column: "disabled_time", NamedC: "disabled_time", Type: enumor.Time},
@@ -58,6 +60,10 @@ type Table struct {
 	Status enumor.SubAccountSecretStatus `db:"status" json:"status" validate:"lte=16"`
 	// Extension 云厂商差异扩展字段
 	Extension types.JsonField `db:"extension" json:"extension"`
+	// AccountID 账号id
+	AccountID string `db:"account_id" json:"account_id" validate:"lte=64"`
+	// SubAccountID 子账号id
+	SubAccountID string `db:"sub_account_id" json:"sub_account_id" validate:"lte=64"`
 	// TenantID 租户ID
 	TenantID string `db:"tenant_id" json:"tenant_id" validate:"lte=64"`
 	// CloudCreatedAt 云上创建时间
@@ -106,6 +112,14 @@ func (t Table) InsertValidate() error {
 
 	if len(t.Extension) == 0 {
 		return errors.New("extension is required")
+	}
+
+	if len(t.AccountID) == 0 {
+		return errors.New("account_id is required")
+	}
+
+	if len(t.SubAccountID) == 0 {
+		return errors.New("sub_account_id is required")
 	}
 
 	if len(t.Creator) == 0 {

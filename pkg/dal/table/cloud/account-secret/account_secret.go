@@ -39,6 +39,7 @@ var ColumnDescriptor = utils.ColumnDescriptors{
 	{Column: "type", NamedC: "type", Type: enumor.String},
 	{Column: "status", NamedC: "status", Type: enumor.String},
 	{Column: "extension", NamedC: "extension", Type: enumor.Json},
+	{Column: "account_id", NamedC: "account_id", Type: enumor.String},
 	{Column: "tenant_id", NamedC: "tenant_id", Type: enumor.String},
 	{Column: "creator", NamedC: "creator", Type: enumor.String},
 	{Column: "reviser", NamedC: "reviser", Type: enumor.String},
@@ -58,6 +59,8 @@ type Table struct {
 	Status enumor.AccountSecretStatus `db:"status" json:"status" validate:"lte=16"`
 	// Extension 云厂商差异扩展字段(加密存储)
 	Extension types.JsonField `db:"extension" json:"extension"`
+	// AccountID 账号id
+	AccountID string `db:"account_id" json:"account_id" validate:"lte=64"`
 	// TenantID 租户ID
 	TenantID string `db:"tenant_id" json:"tenant_id" validate:"lte=64"`
 	// Creator 创建者
@@ -108,6 +111,10 @@ func (t Table) InsertValidate() error {
 
 	if len(t.Extension) == 0 {
 		return errors.New("extension is required")
+	}
+
+	if len(t.AccountID) == 0 {
+		return errors.New("account_id is required")
 	}
 
 	if len(t.Creator) == 0 {

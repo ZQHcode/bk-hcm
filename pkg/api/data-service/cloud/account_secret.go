@@ -55,6 +55,7 @@ type AccountSecretBatchCreateReq[T coreas.Extension] struct {
 
 // AccountSecretCreate defines create account secret.
 type AccountSecretCreate[T coreas.Extension] struct {
+	AccountID string                     `json:"account_id" validate:"required"`
 	Type      enumor.AccountSecretType   `json:"type" validate:"required"`
 	Status    enumor.AccountSecretStatus `json:"status" validate:"required"`
 	Extension *T                         `json:"extension" validate:"required"`

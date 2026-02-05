@@ -28,6 +28,7 @@ import (
 // BaseAccountSecret 账号密钥基础信息
 type BaseAccountSecret struct {
 	ID             string                     `json:"id"`
+	AccountID      string                     `json:"account_id"`
 	Vendor         enumor.Vendor              `json:"vendor"`
 	Type           enumor.AccountSecretType   `json:"type"`
 	Status         enumor.AccountSecretStatus `json:"status"`
