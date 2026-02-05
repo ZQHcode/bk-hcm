@@ -49,6 +49,7 @@ func InitAccountService(c *capability.Capability) {
 	h.Add("GetAccountBySecret", http.MethodPost, "/vendors/{vendor}/accounts/secret", svc.GetAccountBySecret)
 	h.Add("CheckByID", http.MethodPost, "/accounts/{account_id}/check", svc.CheckByID)
 	h.Add("ListAccount", http.MethodPost, "/accounts/list", svc.ListAccount)
+	h.Add("ListBizAccount", http.MethodPost, "/bizs/{bk_biz_id}/accounts/list", svc.ListBizAccount)
 	h.Add("ResourceList", http.MethodPost, "/accounts/resources/accounts/list", svc.ResourceList)
 	h.Add("GetAccount", http.MethodGet, "/accounts/{account_id}", svc.GetAccount)
 	h.Add("GetSyncDetail", http.MethodGet, "/accounts/sync_details/{account_id}", svc.GetSyncDetail)
