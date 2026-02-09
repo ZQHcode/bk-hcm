@@ -41,11 +41,11 @@ type AccountSecretClient struct {
 }
 
 // BatchCreateAccountSecret batch create account secret.
-func (cli *restClient) BatchCreateAccountSecret(kt *kit.Kit,
+func (a *AccountSecretClient) BatchCreateAccountSecret(kt *kit.Kit,
 	req *protocloud.AccountSecretBatchCreateReq[coreas.TCloudAccountSecretExtension]) (*core.BatchCreateResult, error) {
 	resp := new(core.BatchCreateResp)
 
-	err := cli.client.Post().
+	err := a.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("account_secrets/batch/create").
@@ -64,12 +64,12 @@ func (cli *restClient) BatchCreateAccountSecret(kt *kit.Kit,
 }
 
 // BatchUpdateAccountSecret batch update account secret.
-func (cli *restClient) BatchUpdateAccountSecret(kt *kit.Kit,
+func (a *AccountSecretClient) BatchUpdateAccountSecret(kt *kit.Kit,
 	req *protocloud.AccountSecretBatchUpdateReq[coreas.TCloudAccountSecretExtension]) error {
 
 	resp := new(rest.BaseResp)
 
-	err := cli.client.Patch().
+	err := a.client.Patch().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("account_secrets/batch/update").
@@ -88,12 +88,12 @@ func (cli *restClient) BatchUpdateAccountSecret(kt *kit.Kit,
 }
 
 // ListAccountSecretWithExtension list account secret with extension.
-func (cli *restClient) ListAccountSecretWithExtension(kt *kit.Kit, req *protocloud.AccountSecretExtListReq) (
+func (a *AccountSecretClient) ListAccountSecretWithExtension(kt *kit.Kit, req *protocloud.AccountSecretExtListReq) (
 	*protocloud.AccountSecretExtListResult[coreas.TCloudAccountSecretExtension], error) {
 
 	resp := new(protocloud.AccountSecretExtListResp[coreas.TCloudAccountSecretExtension])
 
-	err := cli.client.Post().
+	err := a.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("account_secrets/extensions/list").

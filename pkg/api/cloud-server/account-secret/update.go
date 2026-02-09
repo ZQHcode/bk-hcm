@@ -20,32 +20,29 @@
 package accountsecret
 
 import (
-	"net/http"
+	"encoding/json"
 
-	"hcm/cmd/cloud-server/service/capability"
-	"hcm/pkg/client"
-	"hcm/pkg/iam/auth"
-	"hcm/pkg/rest"
+	"hcm/pkg/criteria/enumor"
+	"hcm/pkg/criteria/validator"
 )
 
-// InitService initial the account secret service
-func InitService(c *capability.Capability) {
-	svc := &service{
-		client:     c.ApiClient,
-		authorizer: c.Authorizer,
-	}
-
-	h := rest.NewHandler()
-	h.Add("CheckBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/check",
-		svc.CheckBizAccountSecret)
-	h.Add("CreateBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/create",
-		svc.CreateBizAccountSecret)
-	h.Add("UpdateBizAccountSecret", http.MethodPatch, "/bizs/{bk_biz_id}/account_secrets/{id}",
-		svc.UpdateBizAccountSecret)
-	h.Load(c.WebService)
+// AccountSecretUpdateReq defines account secret update request.
+type AccountSecretUpdateReq struct {
+	Type      *enumor.AccountSecretType `json:"type,omitempty"`
+	Extension *json.RawMessage          `json:"extension,omitempty"`
 }
 
-type service struct {
-	client     *client.ClientSet
-	authorizer auth.Authorizer
+// Validate account secret update request.
+func (req *AccountSecretUpdateReq) Validate() error {
+	if err := validator.Validate.Struct(req); err != nil {
+		return err
+	}
+
+	if req.Type != nil {
+		if err := req.Type.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

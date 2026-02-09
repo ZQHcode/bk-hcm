@@ -196,7 +196,7 @@ func (a *accountSvc) updateForTCloud(cts *rest.Contexts, req *proto.AccountUpdat
 		}
 
 		shouldUpdatedExtension = &dataproto.TCloudAccountExtensionUpdateReq{
-			CloudSubAccountID: extension.CloudSubAccountID,
+			CloudSubAccountID: &extension.CloudSubAccountID,
 			CloudSecretID:     &extension.CloudSecretID,
 			CloudSecretKey:    &extension.CloudSecretKey,
 		}

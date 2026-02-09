@@ -41,13 +41,13 @@ type SubAccountSecretClient struct {
 }
 
 // BatchCreateSubAccountSecret batch create sub account secret.
-func (cli *restClient) BatchCreateSubAccountSecret(kt *kit.Kit,
+func (s *SubAccountSecretClient) BatchCreateSubAccountSecret(kt *kit.Kit,
 	req *protocloud.SubAccountSecretBatchCreateReq[coresass.TCloudSubAccountSecretExtension]) (
 	*core.BatchCreateResult, error) {
 
 	resp := new(core.BatchCreateResp)
 
-	err := cli.client.Post().
+	err := s.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("sub_account_secrets/batch/create").
@@ -66,12 +66,12 @@ func (cli *restClient) BatchCreateSubAccountSecret(kt *kit.Kit,
 }
 
 // BatchUpdateSubAccountSecret batch update sub account secret.
-func (cli *restClient) BatchUpdateSubAccountSecret(kt *kit.Kit,
+func (s *SubAccountSecretClient) BatchUpdateSubAccountSecret(kt *kit.Kit,
 	req *protocloud.SubAccountSecretBatchUpdateReq[coresass.TCloudSubAccountSecretExtension]) error {
 
 	resp := new(rest.BaseResp)
 
-	err := cli.client.Patch().
+	err := s.client.Patch().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("sub_account_secrets/batch/update").
@@ -90,12 +90,13 @@ func (cli *restClient) BatchUpdateSubAccountSecret(kt *kit.Kit,
 }
 
 // ListSubAccountSecretWithExtension list sub account secret with extension.
-func (cli *restClient) ListSubAccountSecretWithExtension(kt *kit.Kit, req *protocloud.SubAccountSecretExtListReq) (
+func (s *SubAccountSecretClient) ListSubAccountSecretWithExtension(kt *kit.Kit,
+	req *protocloud.SubAccountSecretExtListReq) (
 	*protocloud.SubAccountSecretExtListResult[coresass.TCloudSubAccountSecretExtension], error) {
 
 	resp := new(protocloud.SubAccountSecretExtListResp[coresass.TCloudSubAccountSecretExtension])
 
-	err := cli.client.Post().
+	err := s.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
 		SubResourcef("sub_account_secrets/extensions/list").

@@ -52,7 +52,7 @@ func (s *service) CreateBizAccountSecret(cts *rest.Contexts) (interface{}, error
 		return nil, errf.NewFromErr(errf.InvalidParameter, err)
 	}
 
-	// 校验业务访问权限
+	// 校验二级账号操作权限
 	attribute := meta.ResourceAttribute{Basic: &meta.Basic{Type: meta.Account, Action: meta.Update}, BizID: bizID}
 	_, authorized, err := s.authorizer.Authorize(cts.Kit, attribute)
 	if err != nil {
@@ -179,7 +179,7 @@ func (s *service) createTCloudAccountSecret(kt *kit.Kit, req *proto.AccountSecre
 			},
 		},
 	}
-	result, err := s.client.DataService().TCloud.BatchCreateAccountSecret(kt, createReq)
+	result, err := s.client.DataService().TCloud.AccountSecret.BatchCreateAccountSecret(kt, createReq)
 	if err != nil {
 		logs.Errorf("create account secret failed, account_id: %s, type: %s, err: %v, rid: %s", req.AccountID, req.Type,
 			err, kt.Rid)
@@ -193,20 +193,29 @@ func (s *service) createTCloudAccountSecret(kt *kit.Kit, req *proto.AccountSecre
 	if req.Type != enumor.ResourceSecretType {
 		return result.IDs[0], nil
 	}
-	updateReq := &protocloud.AccountUpdateReq[protocloud.TCloudAccountExtensionUpdateReq]{
-		Extension: &protocloud.TCloudAccountExtensionUpdateReq{
-			CloudSecretID:      cvt.ValToPtr(ext.CloudSecretID),
-			CloudSecretKey:     cvt.ValToPtr(ext.CloudSecretKey),
-			CloudSubAccountID:  tcheckResult.CloudSubAccountID,
-			CloudMainAccountID: tcheckResult.CloudMainAccountID,
-		},
+	extReq := &protocloud.TCloudAccountExtensionUpdateReq{
+		CloudSecretID:      cvt.ValToPtr(ext.CloudSecretID),
+		CloudSecretKey:     cvt.ValToPtr(ext.CloudSecretKey),
+		CloudSubAccountID:  cvt.ValToPtr(tcheckResult.CloudSubAccountID),
+		CloudMainAccountID: tcheckResult.CloudMainAccountID,
 	}
-	_, err = s.client.DataService().TCloud.Account.Update(kt.Ctx, kt.Header(), req.AccountID, updateReq)
-	if err != nil {
+	if err = s.updateTCloudAccountExt(kt, req.AccountID, extReq); err != nil {
 		logs.Errorf("update tcloud account extension failed, account_id: %s, err: %v, rid: %s", req.AccountID, err,
 			kt.Rid)
 		return "", err
 	}
 
 	return result.IDs[0], nil
+}
+
+func (s *service) updateTCloudAccountExt(kt *kit.Kit, accountID string,
+	ext *protocloud.TCloudAccountExtensionUpdateReq) error {
+
+	updateReq := &protocloud.AccountUpdateReq[protocloud.TCloudAccountExtensionUpdateReq]{Extension: ext}
+	if _, err := s.client.DataService().TCloud.Account.Update(kt.Ctx, kt.Header(), accountID, updateReq); err != nil {
+		logs.Errorf("update tcloud account extension failed, account_id: %s, err: %v, rid: %s", accountID, err, kt.Rid)
+		return err
+	}
+
+	return nil
 }
