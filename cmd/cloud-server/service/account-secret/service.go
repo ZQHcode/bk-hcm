@@ -38,6 +38,8 @@ func InitService(c *capability.Capability) {
 	h := rest.NewHandler()
 	h.Add("CheckBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/check",
 		svc.CheckBizAccountSecret)
+	h.Add("CreateBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/create",
+		svc.CreateBizAccountSecret)
 	h.Load(c.WebService)
 }
 

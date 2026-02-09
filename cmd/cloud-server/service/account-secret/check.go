@@ -59,7 +59,7 @@ func (s *service) CheckBizAccountSecret(cts *rest.Contexts) (interface{}, error)
 		return nil, errf.New(errf.PermissionDenied, "biz permission denied")
 	}
 
-	// 查询账号基本信息（获取vendor和bk_biz_id）
+	// 查询账号基本信息
 	baseInfo, err := s.client.DataService().Global.Cloud.GetResBasicInfo(
 		cts.Kit, enumor.AccountCloudResType, req.AccountID,
 	)
