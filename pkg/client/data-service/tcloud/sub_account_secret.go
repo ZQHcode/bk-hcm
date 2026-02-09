@@ -50,7 +50,7 @@ func (s *SubAccountSecretClient) BatchCreateSubAccountSecret(kt *kit.Kit,
 	err := s.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("sub_account_secrets/batch/create").
+		SubResourcef("/sub_account_secrets/batch/create").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)
@@ -74,7 +74,7 @@ func (s *SubAccountSecretClient) BatchUpdateSubAccountSecret(kt *kit.Kit,
 	err := s.client.Patch().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("sub_account_secrets/batch/update").
+		SubResourcef("/sub_account_secrets/batch/update").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)
@@ -99,7 +99,7 @@ func (s *SubAccountSecretClient) ListSubAccountSecretWithExtension(kt *kit.Kit,
 	err := s.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("sub_account_secrets/extensions/list").
+		SubResourcef("/sub_account_secrets/extensions/list").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)

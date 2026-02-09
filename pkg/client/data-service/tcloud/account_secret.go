@@ -48,7 +48,7 @@ func (a *AccountSecretClient) BatchCreateAccountSecret(kt *kit.Kit,
 	err := a.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("account_secrets/batch/create").
+		SubResourcef("/account_secrets/batch/create").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)
@@ -72,7 +72,7 @@ func (a *AccountSecretClient) BatchUpdateAccountSecret(kt *kit.Kit,
 	err := a.client.Patch().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("account_secrets/batch/update").
+		SubResourcef("/account_secrets/batch/update").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)
@@ -96,7 +96,7 @@ func (a *AccountSecretClient) ListAccountSecretWithExtension(kt *kit.Kit, req *p
 	err := a.client.Post().
 		WithContext(kt.Ctx).
 		Body(req).
-		SubResourcef("account_secrets/extensions/list").
+		SubResourcef("/account_secrets/extensions/list").
 		WithHeaders(kt.Header()).
 		Do().
 		Into(resp)

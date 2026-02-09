@@ -20,34 +20,26 @@
 package accountsecret
 
 import (
-	"net/http"
-
-	"hcm/cmd/cloud-server/service/capability"
-	"hcm/pkg/client"
-	"hcm/pkg/iam/auth"
-	"hcm/pkg/rest"
+	"hcm/pkg/api/core"
+	"hcm/pkg/criteria/validator"
+	"hcm/pkg/runtime/filter"
 )
 
-// InitService initial the account secret service
-func InitService(c *capability.Capability) {
-	svc := &service{
-		client:     c.ApiClient,
-		authorizer: c.Authorizer,
-	}
-
-	h := rest.NewHandler()
-	h.Add("CheckBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/check",
-		svc.CheckBizAccountSecret)
-	h.Add("CreateBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/account_secrets/create",
-		svc.CreateBizAccountSecret)
-	h.Add("UpdateBizAccountSecret", http.MethodPatch, "/bizs/{bk_biz_id}/account_secrets/{id}",
-		svc.UpdateBizAccountSecret)
-	h.Add("ListBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/vendors/{vendor}/account_secrets/list",
-		svc.ListBizAccountSecret)
-	h.Load(c.WebService)
+// AccountSecretListReq defines account secret list request.
+type AccountSecretListReq struct {
+	Filter *filter.Expression `json:"filter" validate:"required"`
+	Page   *core.BasePage     `json:"page" validate:"required"`
 }
 
-type service struct {
-	client     *client.ClientSet
-	authorizer auth.Authorizer
+// Validate account secret biz list request.
+func (req *AccountSecretListReq) Validate() error {
+	if err := validator.Validate.Struct(req); err != nil {
+		return err
+	}
+
+	if err := req.Page.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }

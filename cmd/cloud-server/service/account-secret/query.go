@@ -20,13 +20,18 @@
 package accountsecret
 
 import (
+	proto "hcm/pkg/api/cloud-server/account-secret"
 	"hcm/pkg/api/core"
 	coreas "hcm/pkg/api/core/cloud/account-secret"
 	protocloud "hcm/pkg/api/data-service/cloud"
+	"hcm/pkg/criteria/enumor"
 	"hcm/pkg/criteria/errf"
 	"hcm/pkg/dal/dao/tools"
+	"hcm/pkg/iam/meta"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
+	"hcm/pkg/rest"
+	"hcm/pkg/runtime/filter"
 )
 
 // getAccountSecretByID gets account secret by id.
@@ -65,4 +70,99 @@ func (s *service) getTCloudAccountSecretByID(kt *kit.Kit, id string) (
 	}
 
 	return &result.Details[0], nil
+}
+
+// ListBizAccountSecret list biz account secret.
+func (s *service) ListBizAccountSecret(cts *rest.Contexts) (interface{}, error) {
+	req := new(proto.AccountSecretListReq)
+	if err := cts.DecodeInto(req); err != nil {
+		return nil, errf.NewFromErr(errf.DecodeRequestFailed, err)
+	}
+	if err := req.Validate(); err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+	vendor := enumor.Vendor(cts.PathParameter("vendor").String())
+	if err := vendor.Validate(); err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+	bizID, err := cts.PathParameter("bk_biz_id").Int64()
+	if err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+	// 权限校验
+	attribute := meta.ResourceAttribute{Basic: &meta.Basic{Type: meta.Biz, Action: meta.Access}, BizID: bizID}
+	_, authorized, err := s.authorizer.Authorize(cts.Kit, attribute)
+	if err != nil {
+		return nil, err
+	}
+	if !authorized {
+		return nil, errf.New(errf.PermissionDenied, "biz permission denied")
+	}
+
+	// 查询业务下的账号IDs
+	accountIDs := make([]string, 0)
+	accountFilter := tools.ExpressionAnd(
+		tools.RuleEqual("type", string(enumor.ResourceAccount)),
+		tools.RuleEqual("bk_biz_id", bizID),
+		tools.RuleEqual("vendor", string(vendor)),
+	)
+	accountListReq := &core.ListReq{Filter: accountFilter, Page: core.NewDefaultBasePage(), Fields: []string{"id"}}
+	for {
+		accountResp, err := s.client.DataService().Global.Account.List(cts.Kit.Ctx, cts.Kit.Header(), accountListReq)
+		if err != nil {
+			logs.Errorf("list account failed, err: %v, rid: %s", err, cts.Kit.Rid)
+			return nil, err
+		}
+		for _, account := range accountResp.Details {
+			accountIDs = append(accountIDs, account.ID)
+		}
+		if len(accountResp.Details) < int(accountListReq.Page.Limit) {
+			break
+		}
+		accountListReq.Page.Start += uint32(accountListReq.Page.Limit)
+	}
+	// 如果没有账号，返回空结果
+	if len(accountIDs) == 0 {
+		if req.Page.Count {
+			return &core.ListResult{Count: 0}, nil
+		}
+		return &core.ListResult{Details: make([]interface{}, 0)}, nil
+	}
+
+	secretFilter, err := tools.And(tools.ExpressionOr(tools.RuleIn("account_id", accountIDs)), req.Filter)
+	if err != nil {
+		logs.Errorf("merge filter failed, err: %v, rid: %s", err, cts.Kit.Rid)
+		return nil, err
+	}
+	switch vendor {
+	case enumor.TCloud:
+		return s.listTCloudAccountSecret(cts.Kit, secretFilter, req.Page)
+	default:
+		return nil, errf.Newf(errf.InvalidParameter, "vendor: %s not support", vendor)
+	}
+}
+
+// listTCloudAccountSecret list tcloud account secret.
+func (s *service) listTCloudAccountSecret(kt *kit.Kit, filter *filter.Expression, page *core.BasePage) (
+	interface{}, error) {
+
+	listReq := &protocloud.AccountSecretExtListReq{Filter: filter, Page: page}
+	secretResp, err := s.client.DataService().TCloud.AccountSecret.ListAccountSecretWithExtension(kt, listReq)
+	if err != nil {
+		logs.Errorf("list tcloud account secret failed, err: %v, rid: %s", err, kt.Rid)
+		return nil, err
+	}
+
+	if page.Count {
+		return secretResp, nil
+	}
+
+	// 密钥脱敏处理
+	for i := range secretResp.Details {
+		if secretResp.Details[i].Extension != nil {
+			secretResp.Details[i].Extension.CloudSecretKey = ""
+		}
+	}
+
+	return secretResp, nil
 }
