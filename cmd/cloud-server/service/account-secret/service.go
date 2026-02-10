@@ -44,6 +44,8 @@ func InitService(c *capability.Capability) {
 		svc.UpdateBizAccountSecret)
 	h.Add("ListBizAccountSecret", http.MethodPost, "/bizs/{bk_biz_id}/vendors/{vendor}/account_secrets/list",
 		svc.ListBizAccountSecret)
+	h.Add("BatchDeleteBizAccountSecret", http.MethodDelete, "/bizs/{bk_biz_id}/vendors/{vendor}/account_secrets/batch",
+		svc.BatchDeleteBizAccountSecret)
 	h.Load(c.WebService)
 }
 
