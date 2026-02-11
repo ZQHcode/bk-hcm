@@ -32,7 +32,6 @@ type BaseAccountSecret struct {
 	Vendor         enumor.Vendor              `json:"vendor"`
 	Type           enumor.AccountSecretType   `json:"type"`
 	Status         enumor.AccountSecretStatus `json:"status"`
-	TenantID       string                     `json:"tenant_id"`
 	*core.Revision `json:",inline"`
 }
 

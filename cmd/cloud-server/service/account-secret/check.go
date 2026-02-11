@@ -25,9 +25,11 @@ import (
 
 	"hcm/cmd/cloud-server/service/common"
 	proto "hcm/pkg/api/cloud-server/account-secret"
+	"hcm/pkg/api/core"
 	corecloud "hcm/pkg/api/core/cloud"
 	"hcm/pkg/criteria/enumor"
 	"hcm/pkg/criteria/errf"
+	"hcm/pkg/dal/dao/tools"
 	"hcm/pkg/iam/meta"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
@@ -60,41 +62,44 @@ func (s *service) CheckBizAccountSecret(cts *rest.Contexts) (interface{}, error)
 	}
 
 	// 查询账号基本信息
-	baseInfo, err := s.client.DataService().Global.Cloud.GetResBasicInfo(
-		cts.Kit, enumor.AccountCloudResType, req.AccountID,
-	)
+	listReq := &core.ListReq{
+		Filter: tools.EqualExpression("id", req.AccountID),
+		Page:   core.NewDefaultBasePage(),
+		Fields: []string{"id", "bk_biz_id", "vendor"},
+	}
+	resp, err := s.client.DataService().Global.Account.List(cts.Kit.Ctx, cts.Kit.Header(), listReq)
 	if err != nil {
 		logs.Errorf("get account basic info failed, account_id: %s, err: %v, rid: %s", req.AccountID, err, cts.Kit.Rid)
 		return nil, err
 	}
-	if baseInfo == nil {
+	if len(resp.Details) == 0 {
 		return nil, errf.Newf(errf.InvalidParameter, "account %s not found", req.AccountID)
 	}
+	account := resp.Details[0]
 
 	// 校验账号是否属于该业务
-	if baseInfo.BkBizID != bizID {
-		return nil, errf.Newf(errf.PermissionDenied,
-			"account %s does not belong to business %d", req.AccountID, bizID)
+	if account.BkBizID != bizID {
+		return nil, errf.Newf(errf.PermissionDenied, "account %s does not belong to business %d", req.AccountID, bizID)
 	}
 
 	// 调用密钥校验
-	return s.checkAccountSecretByVendor(cts.Kit, baseInfo.Vendor, req.Extension)
+	return s.checkAccountSecretByVendor(cts.Kit, account.Vendor, account.ID, req.Extension)
 }
 
 // checkAccountSecretByVendor checks account secret by vendor.
-func (s *service) checkAccountSecretByVendor(kt *kit.Kit, vendor enumor.Vendor, extension json.RawMessage) (
-	interface{}, error) {
+func (s *service) checkAccountSecretByVendor(kt *kit.Kit, vendor enumor.Vendor, accountID string,
+	extension json.RawMessage) (interface{}, error) {
 
 	switch vendor {
 	case enumor.TCloud:
-		return s.checkTCloudAccountSecret(kt, extension)
+		return s.checkTCloudAccountSecret(kt, accountID, extension)
 	default:
 		return nil, fmt.Errorf("unsupported vendor: %s", vendor)
 	}
 }
 
 // checkTCloudAccountSecret checks tcloud account secret.
-func (s *service) checkTCloudAccountSecret(kt *kit.Kit, extension json.RawMessage) (
+func (s *service) checkTCloudAccountSecret(kt *kit.Kit, accountID string, extension json.RawMessage) (
 	*proto.TCloudAccountSecretCheckResult, error) {
 
 	// 解析Extension
@@ -115,6 +120,20 @@ func (s *service) checkTCloudAccountSecret(kt *kit.Kit, extension json.RawMessag
 	if err != nil {
 		logs.Errorf("check tcloud account secret failed, err: %v, rid: %s", err, kt.Rid)
 		return nil, err
+	}
+
+	// 校验与账号云上主账号id是否匹配
+	account, err := s.client.DataService().TCloud.Account.Get(kt.Ctx, kt.Header(), accountID)
+	if err != nil {
+		logs.Errorf("get tcloud account failed, err: %v, account id: %s, rid: %s", err, accountID, kt.Rid)
+		return nil, err
+	}
+	if account.Extension.CloudMainAccountID != info.CloudMainAccountID {
+		logs.Errorf("tcloud account secret mismatch, account id: %s, cur cloud main account id: %s, target cloud "+
+			"account id: %s, rid: %s", accountID, account.Extension.CloudMainAccountID, info.CloudMainAccountID, kt.Rid)
+		return nil, errf.Newf(errf.InvalidParameter, "tcloud account secret mismatch, account id: %s, cur cloud main "+
+			"account id: %s, target cloud account id: %s", accountID, account.Extension.CloudMainAccountID,
+			info.CloudMainAccountID)
 	}
 
 	// 返回结果

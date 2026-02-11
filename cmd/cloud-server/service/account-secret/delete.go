@@ -24,6 +24,7 @@ import (
 
 	proto "hcm/pkg/api/cloud-server/account-secret"
 	"hcm/pkg/api/core"
+	"hcm/pkg/api/core/cloud"
 	protocloud "hcm/pkg/api/data-service/cloud"
 	"hcm/pkg/criteria/enumor"
 	"hcm/pkg/criteria/errf"
@@ -118,15 +119,19 @@ func (s *service) validAndCollectClearExtAccountIDs(kt *kit.Kit, vendor enumor.V
 	for _, secret := range listResp.Details {
 		accountIDs = append(accountIDs, secret.AccountID)
 	}
-	req := protocloud.ListResourceBasicInfoReq{
-		ResourceType: enumor.AccountCloudResType,
-		IDs:          accountIDs,
-		Fields:       []string{"id", "bk_biz_id"},
+	accountReq := &core.ListReq{
+		Filter: tools.ExpressionAnd(tools.RuleIn("id", accountIDs)),
+		Page:   core.NewDefaultBasePage(),
+		Fields: []string{"id", "bk_biz_id"},
 	}
-	infoMap, err := s.client.DataService().Global.Cloud.ListResBasicInfo(kt, req)
+	accountResp, err := s.client.DataService().Global.Account.List(kt.Ctx, kt.Header(), accountReq)
 	if err != nil {
-		logs.Errorf("list account secrets failed, err: %v, account ids: %v, rid: %s", err, accountIDs, kt.Rid)
+		logs.Errorf("list account failed, err: %v, account ids: %v, rid: %s", err, accountIDs, kt.Rid)
 		return nil, err
+	}
+	infoMap := make(map[string]*cloud.BaseAccount)
+	for _, account := range accountResp.Details {
+		infoMap[account.ID] = account
 	}
 
 	// Validate each secret and collect resource secret account ids

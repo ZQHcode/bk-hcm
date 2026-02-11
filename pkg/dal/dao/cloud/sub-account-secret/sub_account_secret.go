@@ -78,7 +78,7 @@ func (dao *SubAccountSecretDao) BatchCreateWithTx(kt *kit.Kit, tx *sqlx.Tx, mode
 	sql := fmt.Sprintf(`INSERT INTO %s (%s) VALUES(%s)`, table.SubAccountSecretTable,
 		tablesubas.Columns.ColumnExpr(), tablesubas.Columns.ColonNameExpr())
 
-	err = dao.Orm.Txn(tx).BulkInsert(kt.Ctx, sql, models)
+	err = dao.Orm.ModifySQLOpts(orm.NewInjectTenantIDOpt(kt.TenantID)).Txn(tx).BulkInsert(kt.Ctx, sql, models)
 	if err != nil {
 		logs.Errorf("insert %s failed, err: %v, sql: %s, rid: %s", table.SubAccountSecretTable, err, sql, kt.Rid)
 		return nil, fmt.Errorf("insert %s failed, err: %v", table.SubAccountSecretTable, err)
@@ -130,7 +130,7 @@ func (dao *SubAccountSecretDao) BatchUpdate(kt *kit.Kit, models []tablesubas.Tab
 			sql := fmt.Sprintf(`UPDATE %s %s WHERE id = :id`, model.TableName(), setExpr)
 			toUpdate["id"] = model.ID
 
-			_, err = dao.Orm.Txn(txn).Update(kt.Ctx, sql, toUpdate)
+			_, err = dao.Orm.ModifySQLOpts(orm.NewInjectTenantIDOpt(kt.TenantID)).Txn(txn).Update(kt.Ctx, sql, toUpdate)
 			if err != nil {
 				logs.Errorf("update sub account secret failed, err: %v, id: %s, rid: %v", err, model.ID, kt.Rid)
 				return nil, err
@@ -156,7 +156,7 @@ func (dao *SubAccountSecretDao) BatchDelete(kt *kit.Kit, expr *filter.Expression
 	sql := fmt.Sprintf(`DELETE FROM %s %s`, table.SubAccountSecretTable, whereExpr)
 
 	_, err = dao.Orm.AutoTxn(kt, func(txn *sqlx.Tx, opt *orm.TxnOption) (interface{}, error) {
-		_, err := dao.Orm.Txn(txn).Delete(kt.Ctx, sql, whereValue)
+		_, err := dao.Orm.ModifySQLOpts(orm.NewInjectTenantIDOpt(kt.TenantID)).Txn(txn).Delete(kt.Ctx, sql, whereValue)
 		if err != nil {
 			logs.ErrorJson("delete sub account secret failed, err: %v, filter: %s, rid: %s", err, expr, kt.Rid)
 			return nil, err
@@ -186,7 +186,7 @@ func (dao *SubAccountSecretDao) List(kt *kit.Kit, opt *types.ListOption) (*types
 
 	if opt.Page.Count {
 		sql := fmt.Sprintf(`SELECT COUNT(*) FROM %s %s`, table.SubAccountSecretTable, whereExpr)
-		count, err := dao.Orm.Do().Count(kt.Ctx, sql, whereValue)
+		count, err := dao.Orm.ModifySQLOpts(orm.NewInjectTenantIDOpt(kt.TenantID)).Do().Count(kt.Ctx, sql, whereValue)
 		if err != nil {
 			logs.ErrorJson("count sub account secrets failed, err: %v, filter: %s, rid: %s", err, opt.Filter, kt.Rid)
 			return nil, err
@@ -203,7 +203,8 @@ func (dao *SubAccountSecretDao) List(kt *kit.Kit, opt *types.ListOption) (*types
 		table.SubAccountSecretTable, whereExpr, pageExpr)
 
 	details := make([]tablesubas.Table, 0)
-	if err = dao.Orm.Do().Select(kt.Ctx, &details, sql, whereValue); err != nil {
+	err = dao.Orm.ModifySQLOpts(orm.NewInjectTenantIDOpt(kt.TenantID)).Do().Select(kt.Ctx, &details, sql, whereValue)
+	if err != nil {
 		logs.ErrorJson("select sub account secret failed, err: %v, sql: %s, filter: %v, rid: %s", err, sql, opt.Filter,
 			kt.Rid)
 		return nil, err

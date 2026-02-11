@@ -24,10 +24,12 @@ import (
 
 	"hcm/cmd/cloud-server/service/common"
 	proto "hcm/pkg/api/cloud-server/account-secret"
+	"hcm/pkg/api/core"
 	coreas "hcm/pkg/api/core/cloud/account-secret"
 	protocloud "hcm/pkg/api/data-service/cloud"
 	"hcm/pkg/criteria/enumor"
 	"hcm/pkg/criteria/errf"
+	"hcm/pkg/dal/dao/tools"
 	"hcm/pkg/iam/meta"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
@@ -70,21 +72,27 @@ func (s *service) UpdateBizAccountSecret(cts *rest.Contexts) (interface{}, error
 	}
 
 	// 查询账号基本信息
-	baseInfo, err := s.client.DataService().Global.Cloud.GetResBasicInfo(cts.Kit, enumor.AccountCloudResType,
-		currentSecret.AccountID)
+	listReq := &core.ListReq{
+		Filter: tools.EqualExpression("id", currentSecret.AccountID),
+		Page:   core.NewDefaultBasePage(),
+		Fields: []string{"id", "bk_biz_id", "vendor"},
+	}
+	resp, err := s.client.DataService().Global.Account.List(cts.Kit.Ctx, cts.Kit.Header(), listReq)
 	if err != nil {
-		logs.Errorf("get account basic info failed, account_id: %s, err: %v, rid: %s", currentSecret.AccountID,
-			err, cts.Kit.Rid)
+		logs.Errorf("get account basic info failed, account_id: %s, err: %v, rid: %s", currentSecret.AccountID, err,
+			cts.Kit.Rid)
 		return nil, err
 	}
-	if baseInfo == nil {
-		return nil, errf.Newf(errf.RecordNotFound, "account %s not found", currentSecret.AccountID)
+	if len(resp.Details) == 0 {
+		return nil, errf.Newf(errf.InvalidParameter, "account %s not found", currentSecret.AccountID)
 	}
-	if baseInfo.BkBizID != bizID {
+	account := resp.Details[0]
+
+	if account.BkBizID != bizID {
 		return nil, errf.Newf(errf.PermissionDenied, "secret %s does not belong to business %d", secretID, bizID)
 	}
 
-	if err := s.updateAccountSecretByType(cts.Kit, baseInfo.Vendor, currentSecret, req); err != nil {
+	if err := s.updateAccountSecretByType(cts.Kit, account.Vendor, currentSecret, req); err != nil {
 		logs.Errorf("update account secret by type failed, secret_id: %s, err: %v, rid: %s", secretID, err, cts.Kit.Rid)
 		return nil, err
 	}
@@ -123,10 +131,13 @@ func (s *service) updateAccountSecretByType(kt *kit.Kit, vendor enumor.Vendor, s
 func (s *service) updateSecretToRes(kt *kit.Kit, vendor enumor.Vendor, secret *coreas.BaseAccountSecret,
 	req *proto.AccountSecretUpdateReq) error {
 
-	if err := s.checkResourceSecretUniqueness(kt, secret.AccountID); err != nil {
-		logs.Errorf("check resource secret uniqueness failed, account_id: %s, err: %v, rid: %s",
-			secret.AccountID, err, kt.Rid)
-		return err
+	// 如果密钥原来不是资源管理类型，需要检验资源密钥的唯一性
+	if secret.Type != enumor.ResourceSecretType {
+		if err := s.checkResourceSecretUniqueness(kt, secret.AccountID); err != nil {
+			logs.Errorf("check resource secret uniqueness failed, err: %v, account_id: %s, rid: %s", err,
+				secret.AccountID, kt.Rid)
+			return err
+		}
 	}
 
 	switch vendor {
@@ -256,8 +267,17 @@ func (s *service) updateTCloudSecret(kt *kit.Kit, secret *coreas.BaseAccountSecr
 func (s *service) getTCloudSecretExt(kt *kit.Kit, secretID string, req *proto.AccountSecretUpdateReq) (
 	*coreas.TCloudAccountSecretExtension, error) {
 
+	secret, err := s.getTCloudAccountSecretByID(kt, secretID)
+	if err != nil {
+		logs.Errorf("list account secret failed, err: %v, secret_id: %s, rid: %s", err, secretID, kt.Rid)
+		return nil, err
+	}
+	if secret == nil {
+		return nil, errf.Newf(errf.RecordNotFound, "account secret %s not found", secretID)
+	}
+
 	if req.Extension != nil {
-		checkResult, err := s.checkTCloudAccountSecret(kt, cvt.PtrToVal(req.Extension))
+		checkResult, err := s.checkTCloudAccountSecret(kt, secret.AccountID, cvt.PtrToVal(req.Extension))
 		if err != nil {
 			logs.Errorf("check account secret failed, err: %v, rid: %s", err, kt.Rid)
 			return nil, err
@@ -274,15 +294,6 @@ func (s *service) getTCloudSecretExt(kt *kit.Kit, secretID string, req *proto.Ac
 			CloudSubAccountID:  checkResult.CloudSubAccountID,
 			CloudMainAccountID: checkResult.CloudMainAccountID,
 		}, nil
-	}
-
-	secret, err := s.getTCloudAccountSecretByID(kt, secretID)
-	if err != nil {
-		logs.Errorf("list account secret failed, err: %v, secret_id: %s, rid: %s", err, secretID, kt.Rid)
-		return nil, err
-	}
-	if secret == nil {
-		return nil, errf.Newf(errf.RecordNotFound, "account secret %s not found", secretID)
 	}
 
 	return secret.Extension, nil

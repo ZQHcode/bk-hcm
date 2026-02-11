@@ -75,7 +75,6 @@ func convTableToBaseAccountSecret(one tableas.Table) coreas.BaseAccountSecret {
 		Vendor:    one.Vendor,
 		Type:      one.Type,
 		Status:    one.Status,
-		TenantID:  one.TenantID,
 		Revision: &core.Revision{
 			Creator:   one.Creator,
 			Reviser:   one.Reviser,

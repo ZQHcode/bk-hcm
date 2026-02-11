@@ -35,7 +35,6 @@ type BaseSubAccountSecret struct {
 	CloudCreatedAt string                        `json:"cloud_created_at"`
 	DisabledTime   string                        `json:"disabled_time"`
 	LastUsedTime   string                        `json:"last_used_time"`
-	TenantID       string                        `json:"tenant_id"`
 	*core.Revision `json:",inline"`
 }
 

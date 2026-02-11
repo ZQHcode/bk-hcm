@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `account_secret` (
     `type` varchar(16) NOT NULL COMMENT '密钥类型',
     `status` varchar(16) NOT NULL COMMENT '密钥状态',
     `extension` json NOT NULL COMMENT '云厂商差异扩展字段',
-    `tenant_id` varchar(64) NOT NULL COMMENT '租户ID',
+    `tenant_id` varchar(64) NOT NULL COMMENT '租户ID' default 'default',
     `creator` varchar(64) NOT NULL COMMENT '创建者',
     `reviser` varchar(64) NOT NULL COMMENT '更新者',
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

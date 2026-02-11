@@ -40,7 +40,6 @@ var ColumnDescriptor = utils.ColumnDescriptors{
 	{Column: "status", NamedC: "status", Type: enumor.String},
 	{Column: "extension", NamedC: "extension", Type: enumor.Json},
 	{Column: "account_id", NamedC: "account_id", Type: enumor.String},
-	{Column: "tenant_id", NamedC: "tenant_id", Type: enumor.String},
 	{Column: "creator", NamedC: "creator", Type: enumor.String},
 	{Column: "reviser", NamedC: "reviser", Type: enumor.String},
 	{Column: "created_at", NamedC: "created_at", Type: enumor.Time},

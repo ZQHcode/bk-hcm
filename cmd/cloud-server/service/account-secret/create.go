@@ -63,24 +63,28 @@ func (s *service) CreateBizAccountSecret(cts *rest.Contexts) (interface{}, error
 	}
 
 	// 查询账号基本信息
-	baseInfo, err := s.client.DataService().Global.Cloud.GetResBasicInfo(
-		cts.Kit, enumor.AccountCloudResType, req.AccountID,
-	)
+	listReq := &core.ListReq{
+		Filter: tools.EqualExpression("id", req.AccountID),
+		Page:   core.NewDefaultBasePage(),
+		Fields: []string{"id", "bk_biz_id", "vendor"},
+	}
+	resp, err := s.client.DataService().Global.Account.List(cts.Kit.Ctx, cts.Kit.Header(), listReq)
 	if err != nil {
 		logs.Errorf("get account basic info failed, account_id: %s, err: %v, rid: %s", req.AccountID, err, cts.Kit.Rid)
 		return nil, err
 	}
-	if baseInfo == nil {
-		return nil, errf.Newf(errf.RecordNotFound, "account %s not found", req.AccountID)
+	if len(resp.Details) == 0 {
+		return nil, errf.Newf(errf.InvalidParameter, "account %s not found", req.AccountID)
 	}
+	account := resp.Details[0]
+
 	// 校验账号是否属于该业务
-	if baseInfo.BkBizID != bizID {
-		return nil, errf.Newf(errf.PermissionDenied,
-			"account %s does not belong to business %d", req.AccountID, bizID)
+	if account.BkBizID != bizID {
+		return nil, errf.Newf(errf.PermissionDenied, "account %s does not belong to business %d", req.AccountID, bizID)
 	}
 
 	// 创建密钥
-	secretID, err := s.createAccountSecretByVendor(cts.Kit, req, baseInfo.Vendor)
+	secretID, err := s.createAccountSecretByVendor(cts.Kit, req, account.Vendor)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +128,7 @@ func (s *service) createAccountSecretByVendor(kt *kit.Kit, req *proto.AccountSec
 	}
 
 	// 密钥有效性校验
-	checkResult, err := s.checkAccountSecretByVendor(kt, vendor, req.Extension)
+	checkResult, err := s.checkAccountSecretByVendor(kt, vendor, req.AccountID, req.Extension)
 	if err != nil {
 		return "", err
 	}
