@@ -129,7 +129,7 @@ func (s *service) ListBizAccountSecret(cts *rest.Contexts) (interface{}, error) 
 		return &core.ListResult{Details: make([]interface{}, 0)}, nil
 	}
 
-	secretFilter, err := tools.And(tools.ExpressionOr(tools.RuleIn("account_id", accountIDs)), req.Filter)
+	secretFilter, err := tools.And(tools.RuleIn("account_id", accountIDs), req.Filter)
 	if err != nil {
 		logs.Errorf("merge filter failed, err: %v, rid: %s", err, cts.Kit.Rid)
 		return nil, err

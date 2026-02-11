@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `sub_account_secret` (
     `account_id` varchar(64) NOT NULL COMMENT '账号ID',
     `sub_account_id` varchar(64) NOT NULL COMMENT '子账号ID',
     `vendor` varchar(16) NOT NULL COMMENT '云厂商',
-    `status` varchar(16) NOT NULL COMMENT '密钥状态(enabled:启用 disabled:禁用)',
+    `status` varchar(16) NOT NULL COMMENT '密钥状态',
     `extension` json NOT NULL COMMENT '云厂商差异扩展字段',
     `tenant_id` varchar(64) NOT NULL COMMENT '租户ID',
     `cloud_created_at` timestamp NULL COMMENT '云上创建时间',

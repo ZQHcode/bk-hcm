@@ -53,7 +53,7 @@ func (req *OtherAccountExtensionCreateReq) EncryptSecretKey(_ cryptography.Crypt
 // TCloudAccountExtensionCreateReq ...
 type TCloudAccountExtensionCreateReq struct {
 	CloudMainAccountID string `json:"cloud_main_account_id" validate:"required"`
-	CloudSubAccountID  string `json:"cloud_sub_account_id" validate:"required"`
+	CloudSubAccountID  string `json:"cloud_sub_account_id" validate:"omitempty"`
 	CloudSecretID      string `json:"cloud_secret_id" validate:"omitempty"`
 	CloudSecretKey     string `json:"cloud_secret_key" validate:"omitempty"`
 }

@@ -206,11 +206,18 @@ func (a *applicationSvc) CreateForAddAccount(cts *rest.Contexts) (interface{}, e
 		return nil, err
 	}
 
+	commReq, err := decodeCommonReqAndValidate(cts)
+	if err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+
 	req, err := parseReqFromRequestBody[proto.AccountAddReq](cts)
 	if err != nil {
 		return nil, err
 	}
-	return a.createForAddAccount(cts, req)
+	handler := accounthandler.NewApplicationOfAddAccount(a.getHandlerOption(cts), a.authorizer, req)
+
+	return a.create(cts, commReq, handler)
 }
 
 // CreateBizForAddAccount create biz for add account
@@ -232,6 +239,11 @@ func (a *applicationSvc) CreateBizForAddAccount(cts *rest.Contexts) (interface{}
 		return nil, errf.New(errf.PermissionDenied, "biz permission denied")
 	}
 
+	commReq, err := decodeCommonReqAndValidate(cts)
+	if err != nil {
+		return nil, errf.NewFromErr(errf.InvalidParameter, err)
+	}
+
 	req, err := parseReqFromRequestBody[proto.AccountAddReq](cts)
 	if err != nil {
 		return nil, err
@@ -240,16 +252,6 @@ func (a *applicationSvc) CreateBizForAddAccount(cts *rest.Contexts) (interface{}
 		return nil, errf.Newf(errf.InvalidParameter,
 			"path bk_biz_id(%d) does not match request body bk_biz_id(%d)", bizID, req.BkBizID)
 	}
-
-	return a.createForAddAccount(cts, req)
-}
-
-func (a *applicationSvc) createForAddAccount(cts *rest.Contexts, req *proto.AccountAddReq) (interface{}, error) {
-	commReq, err := decodeCommonReqAndValidate(cts)
-	if err != nil {
-		return nil, errf.NewFromErr(errf.InvalidParameter, err)
-	}
-
 	handler := accounthandler.NewApplicationOfAddAccount(a.getHandlerOption(cts), a.authorizer, req)
 
 	return a.create(cts, commReq, handler)

@@ -70,11 +70,12 @@ func (svc *accountSecretSvc) ListAccountSecret(cts *rest.Contexts) (interface{},
 
 func convTableToBaseAccountSecret(one tableas.Table) coreas.BaseAccountSecret {
 	return coreas.BaseAccountSecret{
-		ID:       one.ID,
-		Vendor:   one.Vendor,
-		Type:     one.Type,
-		Status:   one.Status,
-		TenantID: one.TenantID,
+		ID:        one.ID,
+		AccountID: one.AccountID,
+		Vendor:    one.Vendor,
+		Type:      one.Type,
+		Status:    one.Status,
+		TenantID:  one.TenantID,
 		Revision: &core.Revision{
 			Creator:   one.Creator,
 			Reviser:   one.Reviser,
@@ -134,6 +135,10 @@ func convAccountSecretListResult[T coreas.Extension](tables []tableas.Table) (
 				return nil, fmt.Errorf("unmarshal extension failed, err: %v", err)
 			}
 		}
+		details = append(details, coreas.AccountSecret[T]{
+			BaseAccountSecret: convTableToBaseAccountSecret(one),
+			Extension:         extension,
+		})
 	}
 
 	return &protocloud.AccountSecretExtListResult[T]{
