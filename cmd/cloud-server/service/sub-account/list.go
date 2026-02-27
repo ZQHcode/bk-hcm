@@ -75,6 +75,11 @@ func (svc *service) ListSubAccountExt(cts *rest.Contexts) (interface{}, error) {
 	return svc.listSubAccountExt(cts, handler.ListResourceAuthRes)
 }
 
+// ListBizSubAccountExt list biz sub account.
+func (svc *service) ListBizSubAccountExt(cts *rest.Contexts) (interface{}, error) {
+	return svc.listSubAccountExt(cts, handler.ListBizAuthRes)
+}
+
 func (svc *service) listSubAccountExt(cts *rest.Contexts, authHandler handler.ListAuthResHandler) (interface{}, error) {
 	vendor := enumor.Vendor(cts.PathParameter("vendor").String())
 
