@@ -5,6 +5,7 @@ import { ModelPropertyColumn } from '@/model/typings';
 import usePage from '@/hooks/use-page';
 import useTableSettings from '@/hooks/use-table-settings';
 import { Button } from 'bkui-vue';
+import { useWhereAmI } from '@/hooks/useWhereAmI';
 import type { IPermissionPolicyItem, IRelatedAccount } from '../../typings';
 
 export interface IDataListProps {
@@ -28,6 +29,7 @@ const emit = defineEmits<{
 const { handlePageChange, handlePageSizeChange, handleSort } = usePage();
 
 const { settings } = useTableSettings(props.columns);
+const { isBusinessPage } = useWhereAmI();
 
 // 查看详情
 const handleViewDetails = (row: IPermissionPolicyItem) => {
@@ -35,9 +37,9 @@ const handleViewDetails = (row: IPermissionPolicyItem) => {
 };
 
 // 应用到二级账号
-const handleApplyToAccount = (row: IPermissionPolicyItem) => {
-  emit('apply-to-account', row);
-};
+// const handleApplyToAccount = (row: IPermissionPolicyItem) => {
+//   emit('apply-to-account', row);
+// };
 
 // 编辑
 const handleEditAccount = (row: IPermissionPolicyItem) => {
@@ -138,10 +140,10 @@ const isRelatedAccountColumn = (column: ModelPropertyColumn) => column.id === 'r
           </template>
         </template>
       </bk-table-column>
-      <bk-table-column label="操作" width="180" fixed="right">
+      <bk-table-column label="操作" width="80" fixed="right" v-if="!isBusinessPage">
         <template #default="{ row }">
           <bk-button theme="primary" text @click="handleEditAccount(row)">编辑</bk-button>
-          <bk-button theme="primary" text @click="handleApplyToAccount(row)">应用到二级账号</bk-button>
+          <!-- <bk-button theme="primary" text @click="handleApplyToAccount(row)">应用到二级账号</bk-button> -->
         </template>
       </bk-table-column>
     </bk-table>
