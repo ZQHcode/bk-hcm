@@ -618,7 +618,7 @@ func (a *PolicyLibraryApplier) tcloudListBizTemplatesInScope(kt *kit.Kit, librar
 	}
 
 	conditions := make([]*filter.AtomRule, 0)
-	conditions = append(conditions, tools.RuleEqual("library_id", libraryID))
+	conditions = append(conditions, tools.RuleEqual("policy_library_id", libraryID))
 	for _, batch := range slice.Split(accountIDs, int(filter.DefaultMaxInLimit)) {
 		conditions = append(conditions, tools.RuleIn("account_id", batch))
 	}
