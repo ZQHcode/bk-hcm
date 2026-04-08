@@ -49,6 +49,8 @@ func (a ApplicationType) Validate() error {
 	case UpdateMainAccount:
 
 	case CreateLoadBalancer:
+
+	case ApplyPermissionPolicyLibrary:
 	default:
 		return fmt.Errorf("unsupported application type: %s", a)
 	}
@@ -71,6 +73,9 @@ const (
 	UpdateMainAccount ApplicationType = "update_main_account"
 	// CreateLoadBalancer 创建负载均衡
 	CreateLoadBalancer ApplicationType = "create_load_balancer"
+
+	// ApplyPermissionPolicyLibrary 应用权限策略库
+	ApplyPermissionPolicyLibrary ApplicationType = "apply_permission_policy_library"
 
 	// CreateSecurityGroup 创建安全组
 	CreateSecurityGroup ApplicationType = "create_security_group"

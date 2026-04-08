@@ -22,6 +22,7 @@ package application
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -91,6 +92,9 @@ func InitApplicationService(c *capability.Capability, bkHcmUrl string) {
 func bizService(h *rest.Handler, svc *applicationSvc) {
 	h.Add("ListBizApplications", "POST", "/applications/list", svc.ListBizApplications)
 	h.Add("CreateBizForAddAccount", "POST", "/applications/types/add_account", svc.CreateBizForAddAccount)
+	h.Add("CreateBizForApplyPermissionPolicyLibraryCreate", http.MethodPost,
+		"/vendors/{vendor}/applications/types/apply_permission_policy_library_create",
+		svc.CreateBizForApplyPermissionPolicyLibraryCreate)
 }
 
 type applicationSvc struct {
