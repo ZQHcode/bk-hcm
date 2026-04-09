@@ -38,6 +38,7 @@ import (
 	"hcm/cmd/cloud-server/service/application/handlers/load_balancer/tcloud"
 	createmainaccount "hcm/cmd/cloud-server/service/application/handlers/main-account/create-main-account"
 	updatemainaccount "hcm/cmd/cloud-server/service/application/handlers/main-account/update-main-account"
+	subaccount "hcm/cmd/cloud-server/service/application/handlers/sub-account"
 	"hcm/cmd/cloud-server/service/application/handlers/permission-policy-library"
 	// blank import to register the apply-create handler in the registry via init()
 	_ "hcm/cmd/cloud-server/service/application/handlers/permission-policy-library/apply-create"
@@ -322,6 +323,8 @@ func (a *applicationSvc) getHandlerByApplication(cts *rest.Contexts, application
 			return nil, err
 		}
 		return updatemainaccount.NewApplicationOfUpdateMainAccount(opt, a.authorizer, req), nil
+	case enumor.OperateSubAccount:
+		return subaccount.NewHandlerFromApplication(opt, application.Content)
 	case enumor.ApplyPermissionPolicyLibrary:
 		return permissionpolicylibrary.NewHandlerFromApplication(opt, application.Content)
 	}

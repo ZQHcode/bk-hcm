@@ -50,6 +50,8 @@ func (a ApplicationType) Validate() error {
 
 	case CreateLoadBalancer:
 
+	case OperateSubAccount:
+
 	case ApplyPermissionPolicyLibrary:
 	default:
 		return fmt.Errorf("unsupported application type: %s", a)
@@ -94,6 +96,9 @@ const (
 	UpdateSecurityGroupRule ApplicationType = "update_security_group_rule"
 	// DeleteSecurityGroupRule 删除安全组规则
 	DeleteSecurityGroupRule ApplicationType = "delete_security_group_rule"
+
+	// OperateSubAccount 操作三级账号
+	OperateSubAccount ApplicationType = "operate_sub_account"
 )
 
 // ApplicationStatus 单据状态

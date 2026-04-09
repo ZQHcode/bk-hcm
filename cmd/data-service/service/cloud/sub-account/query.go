@@ -88,7 +88,7 @@ func convCoreSubAccount[T coresubaccount.Extension](db *tablesubaccount.Table) (
 	}, nil
 }
 
-// ListSubAccount list sub account.
+// ListSubAccount list subaccount.
 func (svc *service) ListSubAccount(cts *rest.Contexts) (interface{}, error) {
 	req := new(core.ListReq)
 	if err := cts.DecodeInto(req); err != nil {
@@ -201,8 +201,8 @@ func (svc *service) ListSubAccountExt(cts *rest.Contexts) (interface{}, error) {
 	}
 }
 
-func convListExtResult[T coresubaccount.Extension](models []tablesubaccount.Table) (
-	*dssubaccount.ListExtResult[T], error) {
+func convListExtResult[T coresubaccount.Extension](models []tablesubaccount.Table,
+) (*dssubaccount.ListExtResult[T], error) {
 
 	details := make([]coresubaccount.SubAccount[T], 0, len(models))
 	for _, one := range models {

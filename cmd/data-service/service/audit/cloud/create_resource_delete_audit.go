@@ -127,6 +127,8 @@ func (ad Audit) buildDeleteAuditInfo(kt *kit.Kit, resType enumor.AuditResourceTy
 		audits, err = ad.permissionPolicyLibraryDeleteAuditBuild(kt, deletes)
 	case enumor.AccountSecretAuditResType:
 		audits, err = ad.accountSecretDeleteAuditBuild(kt, deletes)
+	case enumor.SubAccountAuditResType:
+		audits, err = ad.subAccountDeleteAuditBuild(kt, deletes)
 	case enumor.PermissionTemplateAuditResType:
 		audits, err = ad.permissionTemplateDeleteAuditBuild(kt, deletes)
 
