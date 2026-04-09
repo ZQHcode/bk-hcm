@@ -21,7 +21,6 @@ package permissionpolicylibrary
 
 import (
 	"fmt"
-	"hcm/pkg/runtime/filter"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,6 +39,7 @@ import (
 	"hcm/pkg/dal/dao/tools"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
+	"hcm/pkg/runtime/filter"
 	cvt "hcm/pkg/tools/converter"
 	"hcm/pkg/tools/maps"
 	"hcm/pkg/tools/slice"
@@ -158,7 +158,7 @@ func (a *PolicyLibraryApplier) CheckAccountsBizInScope(kt *kit.Kit, allowedBkBiz
 	accounts := make([]*corecloud.BaseAccount, 0)
 	for _, batch := range slice.Split(accountIDs, int(core.DefaultMaxPageLimit)) {
 		listReq := &protocloud.AccountListReq{
-			Filter: tools.ContainersExpression("id", batch),
+			Filter: tools.ExpressionAnd(tools.RuleIn("id", batch), tools.RuleEqual("type", enumor.ResourceAccount)),
 			Page:   core.NewDefaultBasePage(),
 		}
 		result, err := a.client.DataService().Global.Account.List(kt.Ctx, kt.Header(), listReq)
@@ -474,8 +474,9 @@ func (a *PolicyLibraryApplier) listAllInScopeAccountIDs(kt *kit.Kit, vendor enum
 	accountIDs := make([]string, 0)
 	for _, batch := range slice.Split(bizIDs, int(core.DefaultMaxPageLimit)) {
 		req := &protocloud.AccountListReq{
-			Filter: tools.ExpressionAnd(tools.RuleEqual("vendor", vendor), tools.RuleIn("bk_biz_id", batch)),
-			Page:   &core.BasePage{Start: 0, Limit: core.DefaultMaxPageLimit},
+			Filter: tools.ExpressionAnd(tools.RuleEqual("vendor", vendor),
+				tools.RuleEqual("type", enumor.ResourceAccount), tools.RuleIn("bk_biz_id", batch)),
+			Page: &core.BasePage{Start: 0, Limit: core.DefaultMaxPageLimit},
 		}
 		for {
 			result, err := a.client.DataService().Global.Account.List(kt.Ctx, kt.Header(), req)
