@@ -417,6 +417,18 @@ func (a *PolicyLibraryApplier) TCloudUpdateLocalTemplate(kt *kit.Kit, library *c
 	templateID string) error {
 
 	now := time.Now().UTC().Format(time.RFC3339)
+	updateFields := map[string]interface{}{
+		"policy_document":          library.PolicyDocument,
+		"policy_library_version":   library.Version,
+		"policy_library_sync_time": now,
+		"memo":                     library.Memo,
+	}
+	if err := a.audit.ResUpdateAudit(kt, enumor.PermissionTemplateAuditResType, templateID, updateFields); err != nil {
+		logs.Errorf("tcloud update permission template failed, templateID: %s, err: %v, rid: %s",
+			templateID, err, kt.Rid)
+		return err
+	}
+
 	dsReq := &protocloud.PermissionTemplateBatchUpdateReq[corecloud.TCloudPermissionTemplateExtension]{
 		PermissionTemplates: []protocloud.PermissionTemplateUpdate[corecloud.TCloudPermissionTemplateExtension]{
 			{
