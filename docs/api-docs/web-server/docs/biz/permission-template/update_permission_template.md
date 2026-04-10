@@ -20,8 +20,7 @@ POST /api/v1/cloud/bizs/{bk_biz_id}/vendors/{vendor}/applications/types/update_p
 | 参数名称              | 参数类型   | 必选 | 描述                                                 |
 |-------------------|--------|----|------------------------------------------------------|
 | id                | string | 是  | 云权限模板ID                                          |
-| policy_library_id | string | 否  | 选择的权限策略库ID，仅自定义且非策略库创建的模板可更改策略库 |
-| name              | string | 否  | 模板名称                                              |
+| policy_library_id | string | 是  | 选择的权限策略库ID，仅自定义且非策略库创建的模板可更改策略库 |
 | memo              | string | 否  | 备注                                                  |
 
 ### 调用示例
@@ -30,7 +29,6 @@ POST /api/v1/cloud/bizs/{bk_biz_id}/vendors/{vendor}/applications/types/update_p
 {
   "id": "00000001",
   "policy_library_id": "00000010",
-  "name": "my-updated-permission-template",
   "memo": "更新后的权限模板备注"
 }
 ```
