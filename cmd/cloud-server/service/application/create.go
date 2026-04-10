@@ -912,15 +912,15 @@ func (a *applicationSvc) createBizForApplyPermPolicyLibUpdate(cts *rest.Contexts
 	req *proto.BizApplyPermissionPolicyLibraryUpdateReq) (*core.BatchCreateResult, error) {
 
 	opt := a.getHandlerOption(cts)
-	ids := make([]string, 0, len(req.AccountIDs))
+	ids := make([]string, 0, len(req.PermissionTemplateIDs))
 
-	for _, accountID := range req.AccountIDs {
-		content := applyupdate.BuildContent(bizID, vendor, req, accountID)
+	for _, templateID := range req.PermissionTemplateIDs {
+		content := applyupdate.BuildContent(bizID, vendor, req, templateID)
 		handler := applyupdate.NewApplicationOfApplyPermPolicyLibUpdate(opt, content)
 		result, err := a.create(cts, &proto.CreateCommonReq{}, handler)
 		if err != nil {
 			return nil, errf.NewFromErr(errf.Aborted,
-				fmt.Errorf("create application for account %s failed, err: %w", accountID, err))
+				fmt.Errorf("create application for permission_template %s failed, err: %w", templateID, err))
 		}
 
 		createResult, ok := result.(*core.CreateResult)
