@@ -23,7 +23,7 @@
 
 ## 5. 服务层注册
 
-- [x] 5.1 `cmd/cloud-server/service/application/create.go`：新增 `CreateBizForCreatePermissionTemplate` handler（biz 鉴权、vendor 校验、请求解析、content 构造、调用 `a.create()`）
+- [x] 5.1 `cmd/cloud-server/service/application/create.go`：新增 `CreateBizForCreatePermissionTemplate` handler（`meta.PermissionTemplate/meta.Create` 鉴权含 BizID、vendor 校验、请求解析、content 构造、调用 `a.create()`）
 - [x] 5.2 同文件 `createApplication()`：在 bkBizIDs 赋值判断中加入 `enumor.OperatePermissionTemplate`
 - [x] 5.3 `cmd/cloud-server/service/application/approve.go`：`getHandlerByApplication()` 新增 `case enumor.OperatePermissionTemplate`，调用 `permissiontemplate.NewHandlerFromApplication`；添加 blank import 触发 init() 注册
 - [x] 5.4 `cmd/cloud-server/service/application/init.go`：`bizService()` 中注册路由 `POST /vendors/{vendor}/applications/types/create_permission_template`

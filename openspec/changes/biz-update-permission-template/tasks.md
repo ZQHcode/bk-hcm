@@ -20,6 +20,6 @@
 
 ## 4. 路由与审批注册
 
-- [x] 4.1 在 `application/create.go` 中新增 `CreateBizForUpdatePermissionTemplate` handler 函数（参数校验、鉴权、解析请求、调用 `NewApplicationOfUpdatePermTemplate`）
+- [x] 4.1 在 `application/create.go` 中新增 `CreateBizForUpdatePermissionTemplate` handler 函数（参数校验、`meta.PermissionTemplate/meta.Update` 鉴权含 BizID、解析请求、调用 `NewApplicationOfUpdatePermTemplate`）
 - [x] 4.2 在 `application/init.go` 中注册路由：`POST /vendors/{vendor}/applications/types/update_permission_template`
 - [x] 4.3 在 `application/approve.go` 中添加 blank import `_ "hcm/cmd/cloud-server/service/application/handlers/permission-template/update"`，并在 `getHandlerByApplication` switch 中确认 `OperatePermissionTemplate` 分支已能通过 `permissiontemplate.NewHandlerFromApplication` 分发到 update handler（无需额外修改，因为 update 的 init 会自动注册到 registry）

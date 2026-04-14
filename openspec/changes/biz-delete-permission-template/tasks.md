@@ -27,6 +27,6 @@
 
 ## 6. Application Service — 路由注册
 
-- [x] 6.1 在 `cmd/cloud-server/service/application/create.go` 新增 `CreateBizForDeletePermissionTemplate` 方法：参考 `CreateBizForUpdatePermissionTemplate`，校验 biz_id / 鉴权 / vendor，构造 `BasePermTemplateContent{Action: PermTemplateActionDelete}`，调用 delete handler
+- [x] 6.1 在 `cmd/cloud-server/service/application/create.go` 新增 `CreateBizForDeletePermissionTemplate` 方法：校验 biz_id、`meta.PermissionTemplate/meta.Delete` 鉴权含 BizID、vendor 校验，构造 `BasePermTemplateContent{Action: PermTemplateActionDelete}`，调用 delete handler
 - [x] 6.2 在 `cmd/cloud-server/service/application/init.go` 注册路由 `POST /vendors/{vendor}/applications/types/delete_permission_template`，绑定 `CreateBizForDeletePermissionTemplate`
 - [x] 6.3 在 `cmd/cloud-server/service/application/handlers/permission-template/delete/init.go` 的 `import` 中确保 delete 包被 side-effect 导入（在 application service 的某个 init 导入处添加 `_ "hcm/cmd/cloud-server/service/application/handlers/permission-template/delete"`）
